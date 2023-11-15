@@ -37,7 +37,7 @@ callScriptSlurm <- function(scriptFilePath, argList, prefix="EbmNetCdf") {
       " --error=", jobName, "_%j.err",
       " --mail-type=END",
       " --wrap=\"Rscript '", scriptFilePath, "' ",
-      gsub("\"", "\\\\\"", paste(args, collapse=" ")), "'\"")
+      gsub("\"", "\\\\\"", paste(args, collapse=" ")), "\"")
     cat(clcom, "\n")
     system(clcom)
   }
