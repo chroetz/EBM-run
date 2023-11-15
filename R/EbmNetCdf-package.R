@@ -1,7 +1,10 @@
 #' @keywords internal
 "_PACKAGE"
 
-#' @importFrom dplyr lst
+#' @importFrom dplyr lst filter
+#' @importFrom tibble tibble
+#' @importFrom rlang .env .data
+#' @importFrom RNetCDF open.nc var.get.nc close.nc create.nc var.def.nc dim.def.nc file.inq.nc var.put.nc
 NULL
 
 ## usethis namespace: start

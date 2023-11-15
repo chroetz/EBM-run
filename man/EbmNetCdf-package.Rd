@@ -4,12 +4,12 @@
 \name{EbmNetCdf-package}
 \alias{EbmNetCdf}
 \alias{EbmNetCdf-package}
-\title{EbmNetCdf: What the Package Does (One Line, Title Case)}
+\title{EbmNetCdf: Deal with NetCDF files}
 \description{
-What the package does (one paragraph).
+Deal with NetCDF files.
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com} (\href{https://orcid.org/YOUR-ORCID-ID}{ORCID})
+\strong{Maintainer}: Christof Schötz \email{math@christof-schoetz.de} (\href{https://orcid.org/0000-0003-3528-4544}{ORCID})
 
 }
 \keyword{internal}
