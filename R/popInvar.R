@@ -65,7 +65,7 @@ runPopWeightAggregation <- function(yearsFilter = NULL) {
   regionNames <- getRegionNames()
   cat(length(regionNames), "regions to process.\n")
 
-  cat("Initializing output files... ")
+  cat("Initializing output files...\n")
   initOutNc(years, regionNames, .global$statisticNames)
   cat("Done.\n")
 
@@ -80,7 +80,7 @@ runPopWeightAggregation <- function(yearsFilter = NULL) {
       cat(
         "\tFound",
         length(fullyFilledRegionNames),
-        "years with data. Not re-calculating those.\n")
+        "regions with data. Not re-calculating those.\n")
       regionNames <- setdiff(regionNames, fullyFilledRegionNames)
     } else {
       cat("\tNo filled regions found. Processing all.\n")
@@ -99,6 +99,7 @@ runPopWeightAggregation <- function(yearsFilter = NULL) {
 }
 
 processRegionYear <- function(regionName, year, invarNames, popRegionDistri, batchSize = 5) { # TODO: make batchSize accessible option
+  stopifnot(batchSize >= 1)
   n <- length(invarNames)
   nBatches <- ceiling(n/batchSize)
   batchIdxs <- lapply(
@@ -132,13 +133,10 @@ getFullyFilledRegionNames <- function(year, invarNames) {
   outNc <- open.nc(outNcFilePath, write = TRUE)
   regionNames <- var.get.nc(outNc, "region")
   variableNames <- ncGetNonDimVariableNames(outNc)
-  message(0)
   if (length(variableNames) != length(invarNames)) {
-    message(1)
     return(NULL)
   }
   if (any(variableNames != invarNames)) {
-    message(2)
     return(NULL)
   }
   allData <- read.nc(outNc)
@@ -147,7 +145,6 @@ getFullyFilledRegionNames <- function(year, invarNames) {
     variableNames,
     \(variableName) rowSums(is.na(allData[[variableName]])) > 0)
   isRegionFilled <- rowSums(hasNa) == 0
-  message(3)
   return(regionNames[isRegionFilled])
 }
 
@@ -185,6 +182,9 @@ getPopValues <- function(year) {
   assertLonLat(pop$lonValues, pop$latValues)
 
   popValues <- ifelse(is.na(pop$values), 0, pop$values)
+  if (any(is.na(popValues))) {
+    message("WARNING: NAs in population values in year ", year)
+  }
 
   return(popValues)
 }
@@ -219,6 +219,9 @@ getMaskValues <- function(regionName) {
   assertLonLat(mask$lonValues, rev(mask$latValues))
 
   maskValues <- reverseArrayDim(mask$values, latIdx)
+  if (any(is.na(maskValues))) {
+    message("WARNING: NAs in mask values in region ", regionName)
+  }
 
   return(maskValues)
 }
@@ -226,7 +229,7 @@ getMaskValues <- function(regionName) {
 calcPopRegionDistri <- function(popValues, maskValues) {
   stopifnot(identical(dim(maskValues), dim(popValues)))
   maskPop <- maskValues * popValues
-  maskPopDistri <- maskPop / sum(maskPop)
+  maskPopDistri <- maskPop / pmax(1, sum(maskPop))
   return(maskPopDistri)
 }
 
@@ -252,6 +255,9 @@ getInvarValues <- function(year, fromIdx, count) {
     start = c(1, 1, fromIdx),
     count = c(NA, NA, count))
   close.nc(nc)
+  if (any(is.na(invarValues))) {
+    message("WARNING: NAs in invar values in year ", year, ", `fromIdx` ", fromIdx, ", `count` ", count)
+  }
   return(invarValues)
 }
 
@@ -272,7 +278,7 @@ initOutNc <- function(years, regionNames, statisticNames) {
   for (year in years) {
     outNcFilePath <- getOutNcFilePath(year)
     if (file.exists(outNcFilePath)) {
-      message(outNcFilePath, " already exits. Skipping.")
+      cat(outNcFilePath, " already exits. Do not recreate.\n")
       next
     }
     outNc <- create.nc(outNcFilePath, format = "netcdf4")

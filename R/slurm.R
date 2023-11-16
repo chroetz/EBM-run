@@ -24,7 +24,7 @@ isSlurmAvailable <- function() {
 
 
 #' @export
-callScriptSlurm <- function(scriptFilePath, argList, prefix="EbmNetCdf") {
+callScriptSlurm <- function(scriptFilePath, argList, prefix="EbmNetCdf", qos="standby") {
   stopifnot(isSlurmAvailable())
   for (args in argList) {
     jobName <- paste0(
@@ -34,7 +34,7 @@ callScriptSlurm <- function(scriptFilePath, argList, prefix="EbmNetCdf") {
     cat("Starting SLURM job", jobName, "\n")
     clcom <- paste0(
       "sbatch ",
-      " --qos=short",
+      " --qos=", qos,
       " --job-name=", jobName,
       " --output=", jobName, "_%j.out",
       " --error=", jobName, "_%j.err",
