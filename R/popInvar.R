@@ -132,13 +132,13 @@ getFullyFilledRegionNames <- function(year, invarNames) {
   outNc <- open.nc(outNcFilePath, write = TRUE)
   regionNames <- var.get.nc(outNc, "region")
   variableNames <- ncGetVariableNames(outNc)
-  warning(0)
+  message(0)
   if (length(variableNames) != length(invarNames)) {
-    warning(1)
+    message(1)
     return(NULL)
   }
   if (any(variableNames != invarNames)) {
-    warning(2)
+    message(2)
     return(NULL)
   }
   allData <- read.nc(outNc)
@@ -147,7 +147,7 @@ getFullyFilledRegionNames <- function(year, invarNames) {
     variableNames,
     \(variableName) rowSums(is.na(allData[[variableName]])) > 0)
   isRegionFilled <- rowSums(hasNa) == 0
-  warning(3)
+  message(3)
   return(regionNames[isRegionFilled])
 }
 
@@ -272,7 +272,7 @@ initOutNc <- function(years, regionNames, statisticNames) {
   for (year in years) {
     outNcFilePath <- getOutNcFilePath(year)
     if (file.exists(outNcFilePath)) {
-      warning(outNcFilePath, " already exits. Skipping.")
+      message(outNcFilePath, " already exits. Skipping.")
       next
     }
     outNc <- create.nc(outNcFilePath, format = "netcdf4")
@@ -290,7 +290,7 @@ initOutNc <- function(years, regionNames, statisticNames) {
 
 saveResult <- function(results, year, regionName, statisticName, variableNames) {
   if (any(is.na(results))) {
-    warning(
+    message(
       "Got NA results in year ", year,
       ", region ", regionName,
       ", statistic ", statisticName,
