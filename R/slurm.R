@@ -27,7 +27,10 @@ isSlurmAvailable <- function() {
 callScriptSlurm <- function(scriptFilePath, argList, prefix="EbmNetCdf") {
   stopifnot(isSlurmAvailable())
   for (args in argList) {
-    jobName <- paste0(prefix, "_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"))
+    jobName <- paste0(
+      prefix, "_",
+      format(Sys.time(), "%Y-%m-%d_%H-%M-%S"), "_",
+      gsub("[^a-zA-Z0-9]", "-", paste(args, collapse="-")))
     cat("Starting SLURM job", jobName, "\n")
     clcom <- paste0(
       "sbatch ",

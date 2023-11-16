@@ -1,4 +1,4 @@
-.PopWeightAggregationEnv <- new.env()
+.global <- new.env()
 
 #' @export
 setupPopWeightAggregation <- function(
@@ -17,18 +17,18 @@ setupPopWeightAggregation <- function(
   env <- rlang::current_env()
   lapply(
     argNames,
-    \(nm) assign(nm, env[[nm]], .PopWeightAggregationEnv)
+    \(nm) assign(nm, env[[nm]], .global)
   )
 
-  .PopWeightAggregationEnv$eps <- sqrt(.Machine$double.eps)
+  .global$eps <- sqrt(.Machine$double.eps)
 
-  .PopWeightAggregationEnv$grid <- list(
+  .global$grid <- list(
     lonValues = seq(-180, 180, by = degStep)[-1] - degStep/2,
     latValues = seq(-90, 90, by = degStep)[-1] - degStep/2)
 
   popFileNames <- list.files(popDir, pattern=popFileNamePattern)
   fileYears <- stringr::str_match(popFileNames, popFileNamePattern)[,2] |> as.integer()
-  .PopWeightAggregationEnv$popFileMeta <- tibble(
+  .global$popFileMeta <- tibble(
     year = fileYears,
     name = popFileNames,
     path = file.path(popDir, popFileNames))
@@ -37,7 +37,7 @@ setupPopWeightAggregation <- function(
     invarDir,
     pattern = invarFileNamePattern)
   fileYears <- stringr::str_match(invarFileNames, invarFileNamePattern)[,2] |> as.integer()
-  .PopWeightAggregationEnv$invarFileMeta <- tibble(
+  .global$invarFileMeta <- tibble(
     year = fileYears,
     name = invarFileNames,
     path = file.path(invarDir, invarFileNames))
@@ -48,8 +48,8 @@ setupPopWeightAggregation <- function(
 #' @export
 setupPopWeightAggregationStatistics <- function(...) {
   args <- list(...)
-  .PopWeightAggregationEnv$statisticNames <- names(args)
-  .PopWeightAggregationEnv$statisticFunctions <- args
+  .global$statisticNames <- names(args)
+  .global$statisticFunctions <- args
   return(invisible())
 }
 
@@ -66,7 +66,7 @@ runPopWeightAggregation <- function(yearsFilter = NULL) {
   cat(length(regionNames), "regions to process.\n")
 
   cat("Initializing output files... ")
-  initOutNc(years, regionNames, .PopWeightAggregationEnv$statisticNames)
+  initOutNc(years, regionNames, .global$statisticNames)
   cat("Done.\n")
 
   cat("Start main loop.\n")
@@ -74,6 +74,15 @@ runPopWeightAggregation <- function(yearsFilter = NULL) {
     cat("Year:", year, "\n")
     popValues <- getPopValues(year)
     invarNames <- getInvarNames(year)
+    checkInvar(year, invarNames)
+    fullyFilledRegionNames <- getFullyFilledRegionNames(year, invarNames)
+    if (length(fullyFilledRegionNames) > 0) {
+      cat(
+        "\tFound",
+        length(fullyFilledRegionNames),
+        "years with data. Not re-calculating those.")
+      regionNames <- setdiff(regionNames, fullyFilledRegionNames)
+    }
     for (regionName in regionNames) {
       cat("\tRegion:", regionName, "\n")
       maskValues <- getMaskValues(regionName)
@@ -86,44 +95,65 @@ runPopWeightAggregation <- function(yearsFilter = NULL) {
   cat("End main loop.\n")
 }
 
-
-processRegionYear <- function(regionName, year, invarNames, popRegionDistri) {
-  for (invarName in invarNames) {
-    cat("\t\tVariable:", invarName, "\n")
+processRegionYear <- function(regionName, year, invarNames, popRegionDistri, batchSize = 10) {
+  n <- length(invarNames)
+  nBatches <- ceiling(n/batchSize)
+  batchIdxs <- lapply(
+    seq_len(nBatches),
+    \(k) {
+      idxs <- (1+(k-1)*batchSize):(k*batchSize)
+      idxs[idxs <= n]
+    }
+  )
+  for (batchNr in seq_len(nBatches)) {
+    idxs <- batchIdxs[[batchNr]]
+    cat("\t\tVariable indices from", min(idxs), "to", max(idxs), "\n")
     pt <- proc.time()
-    invarValues <- getInvarValues(year, invarName)
-    cat("getInvarValues():")
-    print(proc.time()-pt)
-    for (statisticName in .PopWeightAggregationEnv$statisticNames) {
+    invarValues <- getInvarValues(year, min(idxs), length(idxs)) # this takes time
+    cat("\t\t\tgetInvarValues() took", (proc.time()-pt)[3], "s\n")
+    pt <- proc.time()
+    for (statisticName in .global$statisticNames) {
       cat("\t\t\tStatistic:", statisticName, "...")
-      pt <- proc.time()
-      x <- claculateStatisticOnGrid(statisticName, invarValues)
-      result <- integrateDistribution(popRegionDistri, x)
-      cat("calculate:")
-      print(proc.time()-pt)
-      pt <- proc.time()
-      saveResult(result, year, regionName, statisticName, invarName)
-      cat("save:")
-      print(proc.time()-pt)
+      x <- calculateStatisticOnGrid(statisticName, invarValues)
+      results <- integrateDistribution(popRegionDistri, x)
+      saveResult(results, year, regionName, statisticName, invarNames[idxs])
       cat(" Done.\n")
     }
+    cat("\t\t\tcalculating and saving took", (proc.time()-pt)[3], "s\n")
   }
+}
+
+
+getFullyFilledRegionNames <- function(year, invarNames) {
+  outNcFilePath <- getOutNcFilePath(year)
+  outNc <- open.nc(outNcFilePath, write = TRUE)
+  regionNames <- var.get.nc(outNc, "region")
+  variableNames <- ncGetVariableNames(outNc)
+  if (length(variableNames) != length(invarNames)) return(NULL)
+  if (any(variableNames != invarNames)) return(NULL)
+  allData <- read.nc(outNc)
+  close.nc(outNc)
+  hasNa <- sapply(
+    variableNames,
+    \(variableName) rowSums(is.na(allData[[variableName]])) > 0)
+  isRegionFilled <- rowSums(hasNa) == 0
+  return(regionNames[isRegionFilled])
 }
 
 
 assertLonLat <- function(lonValues, latValues) {
   stopifnot(
-    max(abs(.PopWeightAggregationEnv$grid$latValues - latValues)) < .PopWeightAggregationEnv$eps,
-    max(abs(.PopWeightAggregationEnv$grid$lonValues - lonValues)) < .PopWeightAggregationEnv$eps)
+    max(abs(.global$grid$latValues - latValues)) < .global$eps,
+    max(abs(.global$grid$lonValues - lonValues)) < .global$eps)
 
 }
 
-claculateStatisticOnGrid <- function(statisticName, invarValues) {
-  .PopWeightAggregationEnv$statisticFunctions[[statisticName]](invarValues)
+calculateStatisticOnGrid <- function(statisticName, invarValues) {
+  .global$statisticFunctions[[statisticName]](invarValues)
 }
 
 getRegionNames <- function() {
-  nc <- open.nc(.PopWeightAggregationEnv$countryMaskPath)
+  nc <- open.nc(.global$countryMaskPath)
   varNames <- ncGetNonDimVariableNames(nc)
   close.nc(nc)
   return(varNames)
@@ -131,7 +161,7 @@ getRegionNames <- function() {
 
 getPopValues <- function(year) {
   fileInfo <-
-    .PopWeightAggregationEnv$popFileMeta |>
+    .global$popFileMeta |>
     filter(.data$year == .env$year)
   stopifnot(nrow(fileInfo) == 1)
   pop <- list()
@@ -149,18 +179,16 @@ getPopValues <- function(year) {
 }
 
 getInvarFilePath <- function(year) {
-  fileInfo <- .PopWeightAggregationEnv$invarFileMeta |> filter(.data$year == .env$year)
+  fileInfo <- .global$invarFileMeta |> filter(.data$year == .env$year)
   stopifnot(nrow(fileInfo) == 1)
   return(fileInfo$path)
 }
 
 getInvarNames <- function(year) {
   filePath <- getInvarFilePath(year)
-
   nc <- open.nc(filePath)
-  invarNames <- var.get.nc(nc, .PopWeightAggregationEnv$invarDimensionName)
+  invarNames <- var.get.nc(nc, .global$invarDimensionName)
   close.nc(nc)
-
   return(invarNames)
 }
 
@@ -170,7 +198,7 @@ reverseArrayDim <- function(x, i) {
 
 getMaskValues <- function(regionName) {
   mask <- list()
-  nc <- open.nc(.PopWeightAggregationEnv$countryMaskPath)
+  nc <- open.nc(.global$countryMaskPath)
   latIdx <- ncGetDimensionIndex(nc, "lat")
   mask$lonValues <- var.get.nc(nc, "lon")
   mask$latValues <- var.get.nc(nc, "lat")
@@ -191,36 +219,42 @@ calcPopRegionDistri <- function(popValues, maskValues) {
   return(maskPopDistri)
 }
 
-getInvarValues <- function(year, invarName) {
+checkInvar <- function(year, invarNames) {
   filePath <- getInvarFilePath(year)
   invar <- list()
   nc <- open.nc(filePath)
   invar$lonValues <- var.get.nc(nc, "lon")
   invar$latValues <- var.get.nc(nc, "lat")
-  invar$dimensionValues <- var.get.nc(nc, .PopWeightAggregationEnv$invarDimensionName)
-  invarIdx <- which(invar$dimensionValues == invarName)
-  invar$values <- var.get.nc(
-    nc,
-    .PopWeightAggregationEnv$invarValueVariableName,
-    start = c(1, 1, invarIdx),
-    count = c(NA, NA, 1))
+  invar$dimensionValues <- var.get.nc(nc, .global$invarDimensionName)
   close.nc(nc)
-
   assertLonLat(invar$lonValues, invar$latValues)
+  stopifnot(all(invarNames == invar$dimensionValues))
+  return(invisible())
+}
 
-  return(invar$values)
+getInvarValues <- function(year, fromIdx, count) {
+  filePath <- getInvarFilePath(year)
+  nc <- open.nc(filePath)
+  invarValues <- var.get.nc(
+    nc,
+    .global$invarValueVariableName,
+    start = c(1, 1, fromIdx),
+    count = c(NA, NA, count))
+  close.nc(nc)
+  return(invarValues)
 }
 
 integrateDistribution <- function(distri, values) {
-  stopifnot(identical(dim(distri), dim(values)))
-  integral <- sum(distri * values)
+  stopifnot(identical(dim(distri), dim(values)[1,2]))
+  stopifnot(length(dim(values)) == 3)
+  integral <- apply(values, 3, \(x) sum(distri * x))
   return(integral)
 }
 
 getOutNcFilePath <- function(year) {
   file.path(
-    .PopWeightAggregationEnv$outDir,
-    sprintf(.PopWeightAggregationEnv$outNcFilePattern, year))
+    .global$outDir,
+    sprintf(.global$outNcFilePattern, year))
 }
 
 initOutNc <- function(years, regionNames, statisticNames) {
@@ -243,29 +277,41 @@ initOutNc <- function(years, regionNames, statisticNames) {
 
 
 
-saveResult <- function(result, year, regionName, statisticName, variableName) {
+saveResult <- function(results, year, regionName, statisticName, variableNames) {
+  if (any(is.na(results))) {
+    warning(
+      "Got NA results in year ", year,
+      ", region ", regionName,
+      ", statistic ", statisticName,
+      ", variables ", paste(variableNames[is.na(results)], collapse=", "))
+  }
   outNcFilePath <- getOutNcFilePath(year)
   outNc <- open.nc(outNcFilePath, write = TRUE)
-  if (!ncHasVariable(outNc, variableName)) {
-    var.def.nc(outNc, variableName, "NC_DOUBLE", c("region", "statistic"), deflate = 9)
-  }
   regionNames <- var.get.nc(outNc, "region")
   regionIdx <- which(regionName == regionNames)
   stopifnot(length(regionIdx) == 1)
   statisticNames <- var.get.nc(outNc, "statistic")
   statisticIdx <- which(statisticName == statisticNames)
   stopifnot(length(statisticIdx) == 1)
-  var.put.nc(
-    outNc,
-    variableName,
-    result,
-    start = c(regionIdx, statisticIdx),
-    count = c(1, 1))
+  stopifnot(length(results) == length(variableNames))
+  for (i in seq_along(variableNames)) {
+    variableName <- variableNames[[i]]
+    result <- results[[i]]
+    if (!ncHasVariable(outNc, variableName)) {
+      var.def.nc(outNc, variableName, "NC_DOUBLE", c("region", "statistic"), deflate = 9)
+    }
+    var.put.nc(
+      outNc,
+      variableName,
+      result,
+      start = c(regionIdx, statisticIdx),
+      count = c(1, 1))
+  }
   close.nc(outNc)
 }
 
 getYears <- function() {
   intersect(
-    .PopWeightAggregationEnv$popFileMeta$year,
-    .PopWeightAggregationEnv$invarFileMeta$year)
+    .global$popFileMeta$year,
+    .global$invarFileMeta$year)
 }
