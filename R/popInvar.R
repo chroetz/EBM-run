@@ -78,20 +78,36 @@ runPopWeightAggregation <- function(yearsFilter = NULL) {
       cat("\tRegion:", regionName, "\n")
       maskValues <- getMaskValues(regionName)
       popRegionDistri <- calcPopRegionDistri(popValues, maskValues)
-      for (invarName in invarNames) {
-        cat("\t\tVariable:", invarName, "\n")
-        invarValues <- getInvarValues(year, invarName)
-        for (statisticName in .PopWeightAggregationEnv$statisticNames) {
-          cat("\t\t\tStatistic:", statisticName, "...")
-          x <- claculateStatisticOnGrid(statisticName, invarValues)
-          result <- integrateDistribution(popRegionDistri, x)
-          saveResult(result, year, regionName, statisticName, invarName)
-          cat(" Done.\n")
-        }
-      }
+      pt <- proc.time()
+      processRegionYear(regionName, year, invarNames, popRegionDistri)
+      cat("\tprocessRegionYear duration:", (proc.time()-pt)[3], "s\n")
     }
   }
   cat("End main loop.\n")
+}
+
+
+processRegionYear <- function(regionName, year, invarNames, popRegionDistri) {
+  for (invarName in invarNames) {
+    cat("\t\tVariable:", invarName, "\n")
+    pt <- proc.time()
+    invarValues <- getInvarValues(year, invarName)
+    cat("getInvarValues():")
+    print(proc.time()-pt)
+    for (statisticName in .PopWeightAggregationEnv$statisticNames) {
+      cat("\t\t\tStatistic:", statisticName, "...")
+      pt <- proc.time()
+      x <- claculateStatisticOnGrid(statisticName, invarValues)
+      result <- integrateDistribution(popRegionDistri, x)
+      cat("calculate:")
+      print(proc.time()-pt)
+      pt <- proc.time()
+      saveResult(result, year, regionName, statisticName, invarName)
+      cat("save:")
+      print(proc.time()-pt)
+      cat(" Done.\n")
+    }
+  }
 }
 
 
