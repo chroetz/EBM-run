@@ -80,8 +80,10 @@ runPopWeightAggregation <- function(yearsFilter = NULL) {
       cat(
         "\tFound",
         length(fullyFilledRegionNames),
-        "years with data. Not re-calculating those.")
+        "years with data. Not re-calculating those.\n")
       regionNames <- setdiff(regionNames, fullyFilledRegionNames)
+    } else {
+      cat("\tNo filled regions found. Processing all.\n")
     }
     for (regionName in regionNames) {
       cat("\tRegion:", regionName, "\n")
@@ -90,12 +92,13 @@ runPopWeightAggregation <- function(yearsFilter = NULL) {
       pt <- proc.time()
       processRegionYear(regionName, year, invarNames, popRegionDistri)
       cat("\tprocessRegionYear duration:", (proc.time()-pt)[3], "s\n")
+      gc(verbose  = FALSE)
     }
   }
   cat("End main loop.\n")
 }
 
-processRegionYear <- function(regionName, year, invarNames, popRegionDistri, batchSize = 10) {
+processRegionYear <- function(regionName, year, invarNames, popRegionDistri, batchSize = 5) { # TODO: make batchSize accessible option
   n <- length(invarNames)
   nBatches <- ceiling(n/batchSize)
   batchIdxs <- lapply(
