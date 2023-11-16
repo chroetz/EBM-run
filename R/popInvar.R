@@ -245,7 +245,7 @@ getInvarValues <- function(year, fromIdx, count) {
 }
 
 integrateDistribution <- function(distri, values) {
-  stopifnot(identical(dim(distri), dim(values)[1,2]))
+  stopifnot(identical(dim(distri), dim(values)[1:2]))
   stopifnot(length(dim(values)) == 3)
   integral <- apply(values, 3, \(x) sum(distri * x))
   return(integral)
