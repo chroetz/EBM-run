@@ -132,14 +132,22 @@ getFullyFilledRegionNames <- function(year, invarNames) {
   outNc <- open.nc(outNcFilePath, write = TRUE)
   regionNames <- var.get.nc(outNc, "region")
   variableNames <- ncGetVariableNames(outNc)
-  if (length(variableNames) != length(invarNames)) return(NULL)
-  if (any(variableNames != invarNames)) return(NULL)
+  warning(0)
+  if (length(variableNames) != length(invarNames)) {
+    warning(1)
+    return(NULL)
+  }
+  if (any(variableNames != invarNames)) {
+    warning(2)
+    return(NULL)
+  }
   allData <- read.nc(outNc)
   close.nc(outNc)
   hasNa <- sapply(
     variableNames,
     \(variableName) rowSums(is.na(allData[[variableName]])) > 0)
   isRegionFilled <- rowSums(hasNa) == 0
+  warning(3)
   return(regionNames[isRegionFilled])
 }
 
