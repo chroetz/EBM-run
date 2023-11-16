@@ -258,6 +258,11 @@ getInvarValues <- function(year, fromIdx, count) {
   if (any(is.na(invarValues))) {
     message("WARNING: NAs in invar values in year ", year, ", `fromIdx` ", fromIdx, ", `count` ", count)
   }
+  if (count == 1) {
+    dim(invarValues) <- c(dim(invarValues), 1)
+  }
+  stopifnot(length(invarValues) == 3)
+  stopifnot(dim(invarValues)[3] == count)
   return(invarValues)
 }
 
