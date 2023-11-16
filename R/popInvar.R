@@ -261,7 +261,7 @@ getInvarValues <- function(year, fromIdx, count) {
   if (count == 1) {
     dim(invarValues) <- c(dim(invarValues), 1)
   }
-  stopifnot(length(invarValues) == 3)
+  stopifnot(length(dim(invarValues)) == 3)
   stopifnot(dim(invarValues)[3] == count)
   return(invarValues)
 }
