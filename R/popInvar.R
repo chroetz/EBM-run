@@ -131,7 +131,7 @@ getFullyFilledRegionNames <- function(year, invarNames) {
   outNcFilePath <- getOutNcFilePath(year)
   outNc <- open.nc(outNcFilePath, write = TRUE)
   regionNames <- var.get.nc(outNc, "region")
-  variableNames <- ncGetVariableNames(outNc)
+  variableNames <- ncGetNonDimVariableNames(outNc)
   message(0)
   if (length(variableNames) != length(invarNames)) {
     message(1)
