@@ -11,7 +11,8 @@ setupPopWeightAggregation <- function(
   invarDimensionName,
   invarValueVariableName,
   outDir,
-  outNcFilePattern
+  outNcFilePattern,
+  batchSize
 ) {
   argNames <- rlang::fn_fmls_names()
   env <- rlang::current_env()
@@ -90,15 +91,20 @@ runPopWeightAggregation <- function(yearsFilter = NULL) {
       maskValues <- getMaskValues(regionName)
       popRegionDistri <- calcPopRegionDistri(popValues, maskValues)
       pt <- proc.time()
-      processRegionYear(regionName, year, invarNames, popRegionDistri)
+      processRegionYear(
+        regionName,
+        year,
+        invarNames,
+        popRegionDistri,
+        batchSize = .global$batchSize)
       cat("\tprocessRegionYear duration:", (proc.time()-pt)[3], "s\n")
-      gc(verbose  = FALSE)
+      gc(verbose = FALSE)
     }
   }
   cat("End main loop.\n")
 }
 
-processRegionYear <- function(regionName, year, invarNames, popRegionDistri, batchSize = 5) { # TODO: make batchSize accessible option
+processRegionYear <- function(regionName, year, invarNames, popRegionDistri, batchSize) {
   stopifnot(batchSize >= 1)
   n <- length(invarNames)
   nBatches <- ceiling(n/batchSize)
