@@ -144,23 +144,20 @@ processRegionYear <- function(regionName, year, invarNames, popRegionDistri, bat
 
 getFullyFilledRegionNames <- function(year, invarNames) {
   outNcFilePath <- getOutNcFilePath(year)
-  outNc <- open.nc(outNcFilePath, write = TRUE)
+  outNc <- open.nc(outNcFilePath, share = TRUE)
   regionNames <- var.get.nc(outNc, "region")
   variableNames <- ncGetNonDimVariableNames(outNc)
-  if (length(variableNames) != length(invarNames)) {
-    return(NULL)
-  }
-  if (any(variableNames != invarNames)) {
+  if (any(!invarNames %in% variableNames)) {
     return(NULL)
   }
   allData <- tryCatch(read.nc(outNc), error = \(cond) FALSE)
   close.nc(outNc)
-  if (!isFALSE(allData)) {
+  if (isFALSE(allData)) {
     stop("The file ", outNcFilePath, " is corrupt! Probably need to delete it and run calculations again.")
   }
   hasNa <- sapply(
-    variableNames,
-    \(variableName) rowSums(is.na(allData[[variableName]])) > 0)
+    invarNames,
+    \(invarName) rowSums(is.na(allData[[invarName]])) > 0)
   isRegionFilled <- rowSums(hasNa) == 0
   return(regionNames[isRegionFilled])
 }
@@ -325,7 +322,7 @@ saveResult <- function(results, year, regionName, statisticName, variableNames) 
       ", variables ", paste(variableNames[is.na(results)], collapse=", "))
   }
   outNcFilePath <- getOutNcFilePath(year)
-  outNc <- open.nc(outNcFilePath, write = TRUE)
+  outNc <- open.nc(outNcFilePath, write = TRUE, share = TRUE)
   regionNames <- var.get.nc(outNc, "region")
   regionIdx <- which(regionName == regionNames)
   stopifnot(length(regionIdx) == 1)
