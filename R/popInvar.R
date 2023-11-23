@@ -56,7 +56,7 @@ setupPopWeightAggregationStatistics <- function(...) {
 
 
 #' @export
-runPopWeightAggregation <- function(yearsFilter = NULL) {
+runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NULL) {
   cat("Get years ... ")
   years <- getYears()
   if (!is.null(yearsFilter)) years <- intersect(years, yearsFilter)
@@ -75,6 +75,14 @@ runPopWeightAggregation <- function(yearsFilter = NULL) {
     cat("Year:", year, "\n")
     popValues <- getPopValues(year)
     invarNames <- getInvarNames(year)
+    if (!is.null(invarNamesIdxFilter)) {
+      invarNames <- invarNames[invarNamesIdxFilter]
+      invarNames <- invarNames[!is.na(invarNames)]
+    }
+    if (length(invarNames) == 0) {
+      cat("No invarNames to process in year", year, ". Skipping.\n")
+      next
+    }
     checkInvar(year, invarNames)
     fullyFilledRegionNames <- getFullyFilledRegionNames(year, invarNames)
     if (length(fullyFilledRegionNames) > 0) {
@@ -145,8 +153,11 @@ getFullyFilledRegionNames <- function(year, invarNames) {
   if (any(variableNames != invarNames)) {
     return(NULL)
   }
-  allData <- read.nc(outNc)
+  allData <- tryCatch(read.nc(outNc), error = \(cond) FALSE)
   close.nc(outNc)
+  if (!isFALSE(allData)) {
+    stop("The file ", outNcFilePath, " is corrupt! Probably need to delete it and run calculations again.")
+  }
   hasNa <- sapply(
     variableNames,
     \(variableName) rowSums(is.na(allData[[variableName]])) > 0)
@@ -248,7 +259,7 @@ checkInvar <- function(year, invarNames) {
   invar$dimensionValues <- var.get.nc(nc, .global$invarDimensionName)
   close.nc(nc)
   assertLonLat(invar$lonValues, invar$latValues)
-  stopifnot(all(invarNames == invar$dimensionValues))
+  stopifnot(all(invarNames %in% invar$dimensionValues))
   return(invisible())
 }
 
