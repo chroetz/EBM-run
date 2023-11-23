@@ -144,7 +144,7 @@ processRegionYear <- function(regionName, year, invarNames, popRegionDistri, bat
 
 getFullyFilledRegionNames <- function(year, invarNames) {
   outNcFilePath <- getOutNcFilePath(year)
-  outNc <- open.nc(outNcFilePath, share = TRUE)
+  outNc <- open.nc(outNcFilePath, share = FALSE)
   regionNames <- var.get.nc(outNc, "region")
   variableNames <- ncGetNonDimVariableNames(outNc)
   if (any(!invarNames %in% variableNames)) {
@@ -322,7 +322,7 @@ saveResult <- function(results, year, regionName, statisticName, variableNames) 
       ", variables ", paste(variableNames[is.na(results)], collapse=", "))
   }
   outNcFilePath <- getOutNcFilePath(year)
-  outNc <- open.nc(outNcFilePath, write = TRUE, share = TRUE)
+  outNc <- open.nc(outNcFilePath, write = TRUE, share = FALSE)
   regionNames <- var.get.nc(outNc, "region")
   regionIdx <- which(regionName == regionNames)
   stopifnot(length(regionIdx) == 1)
