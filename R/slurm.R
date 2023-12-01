@@ -35,7 +35,7 @@ callScriptSlurm <- function(
     mail = TRUE
 ) {
   qos <- match.arg(qos)
-  partition <- match.arg(partition)
+  #partition <- match.arg(partition)
   stopifnot(isSlurmAvailable())
   for (args in argList) {
     jobName <- paste0(
