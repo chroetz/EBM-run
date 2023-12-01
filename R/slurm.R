@@ -24,7 +24,18 @@ isSlurmAvailable <- function() {
 
 
 #' @export
-callScriptSlurm <- function(scriptFilePath, argList, prefix="EbmNetCdf", qos="standby", cpusPerTask=1) {
+callScriptSlurm <- function(
+    scriptFilePath,
+    argList,
+    prefix = "EbmNetCdf",
+    qos = c("standby", "io", "short", "medium", "long", "gpushort", "gpumedium", "gpulong", "gpupreempt"),
+    partition = c("priority", "io", "gpu", "largemem", "standard"),
+    cpusPerTask = 1,
+    timeInMinutes = NULL,
+    mail = TRUE
+) {
+  qos <- match.arg(qos)
+  partition <- match.arg(partition)
   stopifnot(isSlurmAvailable())
   for (args in argList) {
     jobName <- paste0(
@@ -35,12 +46,14 @@ callScriptSlurm <- function(scriptFilePath, argList, prefix="EbmNetCdf", qos="st
     clcom <- paste0(
       "sbatch ",
       " --qos=", qos,
+      " --partition=", partition,
       " --nodes=1 --ntasks=1",
       " --cpus-per-task=", cpusPerTask,
       " --job-name=", jobName,
       " --output=", jobName, "_%j.out",
       " --error=", jobName, "_%j.err",
-      " --mail-type=END",
+      if (!is.null(timeInMinutes)) paste0(" --time ", timeInMinutes),
+      if (mail) " --mail-type=END",
       " --wrap=\"Rscript '", scriptFilePath, "' ",
       gsub("\"", "\\\\\"", paste(args, collapse=" ")), "\"")
     cat(clcom, "\n")
