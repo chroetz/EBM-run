@@ -24,7 +24,7 @@ isSlurmAvailable <- function() {
 
 
 #' @export
-callScriptSlurm <- function(scriptFilePath, argList, prefix="EbmNetCdf", qos="standby") {
+callScriptSlurm <- function(scriptFilePath, argList, prefix="EbmNetCdf", qos="standby", cpusPerTask=1) {
   stopifnot(isSlurmAvailable())
   for (args in argList) {
     jobName <- paste0(
@@ -35,6 +35,8 @@ callScriptSlurm <- function(scriptFilePath, argList, prefix="EbmNetCdf", qos="st
     clcom <- paste0(
       "sbatch ",
       " --qos=", qos,
+      " --nodes=1 --ntasks=1",
+      " --cpus-per-task=", cpusPerTask,
       " --job-name=", jobName,
       " --output=", jobName, "_%j.out",
       " --error=", jobName, "_%j.err",
