@@ -29,7 +29,7 @@ callScriptSlurm <- function(
     argList,
     prefix = "EbmNetCdf",
     qos = c("standby", "io", "short", "medium", "long", "gpushort", "gpumedium", "gpulong", "gpupreempt"),
-    partition = c("priority", "io", "gpu", "largemem", "standard"),
+    #partition = c("priority", "io", "gpu", "largemem", "standard"), # Need to match qos to partitions...
     cpusPerTask = 1,
     timeInMinutes = NULL,
     mail = TRUE
@@ -46,7 +46,7 @@ callScriptSlurm <- function(
     clcom <- paste0(
       "sbatch ",
       " --qos=", qos,
-      " --partition=", partition,
+      #" --partition=", partition,
       " --nodes=1 --ntasks=1",
       " --cpus-per-task=", cpusPerTask,
       " --job-name=", jobName,
