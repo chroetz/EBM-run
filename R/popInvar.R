@@ -312,8 +312,9 @@ initOutNc <- function(years, regionNames, statisticNames) {
 }
 
 
-
+# TODO: remove print debugging
 saveResult <- function(results, year, regionName, statisticName, variableNames) {
+  stopifnot(length(results) == length(variableNames))
   if (any(is.na(results))) {
     message(
       "Got NA results in year ", year,
@@ -322,28 +323,37 @@ saveResult <- function(results, year, regionName, statisticName, variableNames) 
       ", variables ", paste(variableNames[is.na(results)], collapse=", "))
   }
   outNcFilePath <- getOutNcFilePath(year)
+cat("a")
   outNc <- open.nc(outNcFilePath, write = TRUE, share = FALSE)
+cat("b")
   regionNames <- var.get.nc(outNc, "region")
+cat("c")
   regionIdx <- which(regionName == regionNames)
   stopifnot(length(regionIdx) == 1)
   statisticNames <- var.get.nc(outNc, "statistic")
   statisticIdx <- which(statisticName == statisticNames)
   stopifnot(length(statisticIdx) == 1)
-  stopifnot(length(results) == length(variableNames))
   for (i in seq_along(variableNames)) {
+cat(i)
     variableName <- variableNames[[i]]
     result <- results[[i]]
     if (!ncHasVariable(outNc, variableName)) {
+cat("A")
       var.def.nc(outNc, variableName, "NC_DOUBLE", c("region", "statistic"), deflate = 9)
+cat("B")
     }
+cat("C")
     var.put.nc(
       outNc,
       variableName,
       result,
       start = c(regionIdx, statisticIdx),
       count = c(1, 1))
+cat("D")
   }
+cat("d")
   close.nc(outNc)
+cat("e")
 }
 
 getYears <- function() {
