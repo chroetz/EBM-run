@@ -1,8 +1,10 @@
+#' @export
 saveBoundingBoxes <- function(boundingBoxes, outFilePath, regionColumnName = "GID_1") {
   tbl <- tibble::as_tibble(t(boundingBoxes), rownames = regionColumnName)
   readr::write_csv(tbl, outFilePath)
 }
 
+#' @export
 getBoundingBoxesFromMask <- function(path) {
   nc <- open.nc(path)
   on.exit(close.nc(nc))
