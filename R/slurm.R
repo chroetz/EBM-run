@@ -28,7 +28,7 @@ callScriptSlurm <- function(
     scriptFilePath,
     argList,
     prefix = "EbmNetCdf",
-    qos = c("standby", "io", "short", "medium", "long", "gpushort", "gpumedium", "gpulong", "gpupreempt"),
+    qos = c("standby", "priority", "io", "short", "medium", "long", "gpushort", "gpumedium", "gpulong", "gpupreempt"),
     #partition = c("priority", "io", "gpu", "largemem", "standard"), # Need to match qos to partitions...
     cpusPerTask = 1,
     timeInMinutes = NULL,
