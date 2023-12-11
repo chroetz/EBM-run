@@ -4,6 +4,7 @@
 setupPopWeightAggregation <- function(
   degStep,
   countryMaskPath,
+  boundingBoxPath,
   popDir,
   popFileNamePattern,
   invarDir,
@@ -26,6 +27,8 @@ setupPopWeightAggregation <- function(
   .global$grid <- list(
     lonValues = seq(-180, 180, by = degStep)[-1] - degStep/2,
     latValues = seq(-90, 90, by = degStep)[-1] - degStep/2)
+
+  .global$idxBoundingBoxes <- readr::read_csv(boundingBoxPath, col_types = readr::cols())
 
   popFileNames <- list.files(popDir, pattern=popFileNamePattern)
   fileYears <- stringr::str_match(popFileNames, popFileNamePattern)[,2] |> as.integer()
@@ -73,7 +76,7 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
   cat("Start main loop.\n")
   for (year in years) {
     cat("Year:", year, "\n")
-    popValues <- getPopValues(year)
+    popValuesAll <- getPopValues(year)
     invarNames <- getInvarNames(year)
     if (!is.null(invarNamesIdxFilter)) {
       invarNames <- invarNames[invarNamesIdxFilter]
@@ -96,8 +99,9 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
     }
     for (regionName in regionNames) {
       cat("\tRegion:", regionName, "\n")
+      popValuesRegion <- subsetRegion(popValuesAll, regionName)
       maskValues <- getMaskValues(regionName)
-      popRegionDistri <- calcPopRegionDistri(popValues, maskValues)
+      popRegionDistri <- calcPopRegionDistri(popValuesRegion, maskValues)
       pt <- proc.time()
       processRegionYear(
         regionName,
@@ -127,7 +131,7 @@ processRegionYear <- function(regionName, year, invarNames, popRegionDistri, bat
     idxs <- batchIdxs[[batchNr]]
     cat("\t\tVariable indices from", min(idxs), "to", max(idxs), "\n")
     pt <- proc.time()
-    invarValues <- getInvarValues(year, min(idxs), length(idxs)) # this takes time
+    invarValues <- getInvarValues(year, min(idxs), length(idxs), regionName) # this takes time
     cat("\t\t\tgetInvarValues() took", (proc.time()-pt)[3], "s\n")
     pt <- proc.time()
     for (statisticName in .global$statisticNames) {
@@ -167,7 +171,6 @@ assertLonLat <- function(lonValues, latValues) {
   stopifnot(
     max(abs(.global$grid$latValues - latValues)) < .global$eps,
     max(abs(.global$grid$lonValues - lonValues)) < .global$eps)
-
 }
 
 calculateStatisticOnGrid <- function(statisticName, invarValues) {
@@ -203,6 +206,11 @@ getPopValues <- function(year) {
   return(popValues)
 }
 
+subsetRegion <- function(valuesOnTotalGrid, regionName) {
+  info <- .global$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
+  return(valuesOnTotalGrid[info$min_lon:info$max_lon,info$min_lat:info$max_lat])
+}
+
 getInvarFilePath <- function(year) {
   fileInfo <- .global$invarFileMeta |> filter(.data$year == .env$year)
   stopifnot(nrow(fileInfo) == 1)
@@ -221,13 +229,22 @@ reverseArrayDim <- function(x, i) {
   DescTools::Rev(x, i)
 }
 
-getMaskValues <- function(regionName) {
+getMaskValues <- function(regionName, onlyBoundingBox = TRUE) {
   mask <- list()
   nc <- open.nc(.global$countryMaskPath)
   latIdx <- ncGetDimensionIndex(nc, "lat")
   mask$lonValues <- var.get.nc(nc, "lon")
   mask$latValues <- var.get.nc(nc, "lat")
-  mask$values <- var.get.nc(nc, regionName)
+  if (onlyBoundingBox) {
+    bbInfo <- .global$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
+    mask$values <- var.get.nc(
+      nc,
+      regionName,
+      start = c(bbInfo$min_lon, bbInfo$min_lat),
+      count = c(bbInfo$max_lon - bbInfo$min_lon + 1, bbInfo$max_lat - bbInfo$min_lat + 1))
+  } else {
+    mask$values <- var.get.nc(nc, regionName)
+  }
   close.nc(nc)
 
   assertLonLat(mask$lonValues, rev(mask$latValues))
@@ -260,14 +277,15 @@ checkInvar <- function(year, invarNames) {
   return(invisible())
 }
 
-getInvarValues <- function(year, fromIdx, count) {
+getInvarValues <- function(year, fromIdx, count, regionName) {
+  bbInfo <- .global$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
   filePath <- getInvarFilePath(year)
   nc <- open.nc(filePath)
   invarValues <- var.get.nc(
     nc,
     .global$invarValueVariableName,
-    start = c(1, 1, fromIdx),
-    count = c(NA, NA, count))
+    start = c(bbInfo$min_lon, bbInfo$min_lat, fromIdx),
+    count = c(bbInfo$max_lon - bbInfo$min_lon + 1, bbInfo$max_lat - bbInfo$min_lat + 1, count))
   close.nc(nc)
   if (any(is.na(invarValues))) {
     message("WARNING: NAs in invar values in year ", year, ", `fromIdx` ", fromIdx, ", `count` ", count)
@@ -312,7 +330,6 @@ initOutNc <- function(years, regionNames, statisticNames) {
 }
 
 
-# TODO: remove print debugging
 saveResult <- function(results, year, regionName, statisticName, variableNames) {
   stopifnot(length(results) == length(variableNames))
   if (any(is.na(results))) {
@@ -323,37 +340,27 @@ saveResult <- function(results, year, regionName, statisticName, variableNames) 
       ", variables ", paste(variableNames[is.na(results)], collapse=", "))
   }
   outNcFilePath <- getOutNcFilePath(year)
-cat("a")
   outNc <- open.nc(outNcFilePath, write = TRUE, share = FALSE)
-cat("b")
   regionNames <- var.get.nc(outNc, "region")
-cat("c")
   regionIdx <- which(regionName == regionNames)
   stopifnot(length(regionIdx) == 1)
   statisticNames <- var.get.nc(outNc, "statistic")
   statisticIdx <- which(statisticName == statisticNames)
   stopifnot(length(statisticIdx) == 1)
   for (i in seq_along(variableNames)) {
-cat(i)
     variableName <- variableNames[[i]]
     result <- results[[i]]
     if (!ncHasVariable(outNc, variableName)) {
-cat("A")
       var.def.nc(outNc, variableName, "NC_DOUBLE", c("region", "statistic"), deflate = 9)
-cat("B")
     }
-cat("C")
     var.put.nc(
       outNc,
       variableName,
       result,
       start = c(regionIdx, statisticIdx),
       count = c(1, 1))
-cat("D")
   }
-cat("d")
   close.nc(outNc)
-cat("e")
 }
 
 getYears <- function() {
