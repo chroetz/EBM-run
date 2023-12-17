@@ -208,7 +208,7 @@ getPopValues <- function(year) {
 
 subsetRegion <- function(valuesOnTotalGrid, regionName) {
   info <- .global$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
-  return(valuesOnTotalGrid[info$min_lon:info$max_lon,info$min_lat:info$max_lat])
+  return(valuesOnTotalGrid[info$min_lon:info$max_lon, info$min_lat:info$max_lat, drop=FALSE])
 }
 
 getInvarFilePath <- function(year) {
