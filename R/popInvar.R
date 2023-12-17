@@ -241,7 +241,8 @@ getMaskValues <- function(regionName, onlyBoundingBox = TRUE) {
       nc,
       regionName,
       start = c(bbInfo$min_lon, bbInfo$min_lat),
-      count = c(bbInfo$max_lon - bbInfo$min_lon + 1, bbInfo$max_lat - bbInfo$min_lat + 1))
+      count = c(bbInfo$max_lon - bbInfo$min_lon + 1, bbInfo$max_lat - bbInfo$min_lat + 1),
+      collapse = FALSE)
   } else {
     mask$values <- var.get.nc(nc, regionName)
   }
@@ -285,13 +286,11 @@ getInvarValues <- function(year, fromIdx, count, regionName) {
     nc,
     .global$invarValueVariableName,
     start = c(bbInfo$min_lon, bbInfo$min_lat, fromIdx),
-    count = c(bbInfo$max_lon - bbInfo$min_lon + 1, bbInfo$max_lat - bbInfo$min_lat + 1, count))
+    count = c(bbInfo$max_lon - bbInfo$min_lon + 1, bbInfo$max_lat - bbInfo$min_lat + 1, count),
+    collapse = FALSE)
   close.nc(nc)
   if (any(is.na(invarValues))) {
     message("WARNING: NAs in invar values in year ", year, ", `fromIdx` ", fromIdx, ", `count` ", count)
-  }
-  if (count == 1) {
-    dim(invarValues) <- c(dim(invarValues), 1)
   }
   stopifnot(length(dim(invarValues)) == 3)
   stopifnot(dim(invarValues)[3] == count)
