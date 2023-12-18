@@ -62,7 +62,7 @@ getMaskScaling <- function() {
 runPopSummation <- function(yearsFilter = NULL) {
 
   cat("Get Mask Scaling:")
-  maskScaling <- 1#getMaskScaling()
+  maskScaling <- getMaskScaling()
   cat("\n")
 
   cat("Get years ... ")
