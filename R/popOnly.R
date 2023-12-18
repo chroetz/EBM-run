@@ -35,6 +35,7 @@ setupPopSummation <- function(
 }
 
 getMaskScaling <- function() {
+  # TODO: calculate this only once and save it.
 
   pt <- proc.time()
 
@@ -90,13 +91,10 @@ runPopSummation <- function(yearsFilter = NULL) {
         return(value)
       },
       double(1))
-    result <- dplyr::bind_rows(
-      result,
-      tibble::tibble(
-        year = year,
-        region = regionNames,
-        population = values)
-    )
+    result <- tibble::tibble(
+      year = year,
+      region = regionNames,
+      population = values)
     readr::write_csv(result, sprintf(.infoPop$outFilePathPattern, year))
   }
   cat("End main loop.\n")
