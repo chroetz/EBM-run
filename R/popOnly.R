@@ -90,9 +90,9 @@ runPopSummation <- function(yearsFilter = NULL) {
         return(value)
       },
       double(1))
-    result <- bind_rows(
+    result <- dplyr::bind_rows(
       result,
-      tibble(
+      tibble::tibble(
         year = year,
         region = regionNames,
         population = values)
