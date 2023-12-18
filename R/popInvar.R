@@ -1,4 +1,4 @@
-.global <- new.env()
+.infoInvar <- new.env()
 
 #' @export
 setupPopWeightAggregation <- function(
@@ -19,20 +19,20 @@ setupPopWeightAggregation <- function(
   env <- rlang::current_env()
   lapply(
     argNames,
-    \(nm) assign(nm, env[[nm]], .global)
+    \(nm) assign(nm, env[[nm]], .infoInvar)
   )
 
-  .global$eps <- sqrt(.Machine$double.eps)
+  .infoInvar$eps <- sqrt(.Machine$double.eps)
 
-  .global$grid <- list(
+  .infoInvar$grid <- list(
     lonValues = seq(-180, 180, by = degStep)[-1] - degStep/2,
     latValues = seq(-90, 90, by = degStep)[-1] - degStep/2)
 
-  .global$idxBoundingBoxes <- readr::read_csv(boundingBoxPath, col_types = readr::cols())
+  .infoInvar$idxBoundingBoxes <- readr::read_csv(boundingBoxPath, col_types = readr::cols())
 
   popFileNames <- list.files(popDir, pattern=popFileNamePattern)
   fileYears <- stringr::str_match(popFileNames, popFileNamePattern)[,2] |> as.integer()
-  .global$popFileMeta <- tibble(
+  .infoInvar$popFileMeta <- tibble(
     year = fileYears,
     name = popFileNames,
     path = file.path(popDir, popFileNames))
@@ -41,7 +41,7 @@ setupPopWeightAggregation <- function(
     invarDir,
     pattern = invarFileNamePattern)
   fileYears <- stringr::str_match(invarFileNames, invarFileNamePattern)[,2] |> as.integer()
-  .global$invarFileMeta <- tibble(
+  .infoInvar$invarFileMeta <- tibble(
     year = fileYears,
     name = invarFileNames,
     path = file.path(invarDir, invarFileNames))
@@ -52,8 +52,8 @@ setupPopWeightAggregation <- function(
 #' @export
 setupPopWeightAggregationStatistics <- function(...) {
   args <- list(...)
-  .global$statisticNames <- names(args)
-  .global$statisticFunctions <- args
+  .infoInvar$statisticNames <- names(args)
+  .infoInvar$statisticFunctions <- args
   return(invisible())
 }
 
@@ -66,17 +66,17 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
   cat(length(years), "years to process.\n")
 
   cat("Get regions ... ")
-  regionNames <- getRegionNames()
+  regionNames <- getRegionNames(.infoInvar)
   cat(length(regionNames), "regions to process.\n")
 
   cat("Initializing output files...\n")
-  initOutNc(years, regionNames, .global$statisticNames)
+  initOutNc(years, regionNames, .infoInvar$statisticNames)
   cat("Done.\n")
 
   cat("Start main loop.\n")
   for (year in years) {
     cat("Year:", year, "\n")
-    popValuesAll <- getPopValues(year)
+    popValuesAll <- getPopValues(.infoInvar, year)
     invarNames <- getInvarNames(year)
     if (!is.null(invarNamesIdxFilter)) {
       invarNames <- invarNames[invarNamesIdxFilter]
@@ -99,8 +99,8 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
     }
     for (regionName in regionNames) {
       cat("\tRegion:", regionName, "\n")
-      popValuesRegion <- subsetRegion(popValuesAll, regionName)
-      maskValues <- getMaskValues(regionName)
+      popValuesRegion <- subsetRegion(.infoInvar, popValuesAll, regionName)
+      maskValues <- getMaskValues(.infoInvar, regionName)
       popRegionDistri <- calcPopRegionDistri(popValuesRegion, maskValues)
       pt <- proc.time()
       processRegionYear(
@@ -108,7 +108,7 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
         year,
         invarNames,
         popRegionDistri,
-        batchSize = .global$batchSize)
+        batchSize = .infoInvar$batchSize)
       cat("\tprocessRegionYear duration:", (proc.time()-pt)[3], "s\n")
       gc(verbose = FALSE)
     }
@@ -134,7 +134,7 @@ processRegionYear <- function(regionName, year, invarNames, popRegionDistri, bat
     invarValues <- getInvarValues(year, min(idxs), length(idxs), regionName) # this takes time
     cat("\t\t\tgetInvarValues() took", (proc.time()-pt)[3], "s\n")
     pt <- proc.time()
-    for (statisticName in .global$statisticNames) {
+    for (statisticName in .infoInvar$statisticNames) {
       cat("\t\t\tStatistic:", statisticName, "...")
       x <- calculateStatisticOnGrid(statisticName, invarValues)
       results <- integrateDistribution(popRegionDistri, x)
@@ -169,24 +169,24 @@ getFullyFilledRegionNames <- function(year, invarNames) {
 
 assertLonLat <- function(lonValues, latValues) {
   stopifnot(
-    max(abs(.global$grid$latValues - latValues)) < .global$eps,
-    max(abs(.global$grid$lonValues - lonValues)) < .global$eps)
+    max(abs(.infoInvar$grid$latValues - latValues)) < .infoInvar$eps,
+    max(abs(.infoInvar$grid$lonValues - lonValues)) < .infoInvar$eps)
 }
 
 calculateStatisticOnGrid <- function(statisticName, invarValues) {
-  .global$statisticFunctions[[statisticName]](invarValues)
+  .infoInvar$statisticFunctions[[statisticName]](invarValues)
 }
 
-getRegionNames <- function() {
-  nc <- open.nc(.global$countryMaskPath)
+getRegionNames <- function(info) {
+  nc <- open.nc(info$countryMaskPath)
   varNames <- ncGetNonDimVariableNames(nc)
   close.nc(nc)
   return(varNames)
 }
 
-getPopValues <- function(year) {
+getPopValues <- function(info, year) {
   fileInfo <-
-    .global$popFileMeta |>
+    info$popFileMeta |>
     filter(.data$year == .env$year)
   stopifnot(nrow(fileInfo) == 1)
   pop <- list()
@@ -206,13 +206,13 @@ getPopValues <- function(year) {
   return(popValues)
 }
 
-subsetRegion <- function(valuesOnTotalGrid, regionName) {
-  info <- .global$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
-  return(valuesOnTotalGrid[info$min_lon:info$max_lon, info$min_lat:info$max_lat, drop=FALSE])
+subsetRegion <- function(info, valuesOnTotalGrid, regionName) {
+  nf <- info$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
+  return(valuesOnTotalGrid[nf$min_lon:nf$max_lon, nf$min_lat:nf$max_lat, drop=FALSE])
 }
 
 getInvarFilePath <- function(year) {
-  fileInfo <- .global$invarFileMeta |> filter(.data$year == .env$year)
+  fileInfo <- .infoInvar$invarFileMeta |> filter(.data$year == .env$year)
   stopifnot(nrow(fileInfo) == 1)
   return(fileInfo$path)
 }
@@ -220,7 +220,7 @@ getInvarFilePath <- function(year) {
 getInvarNames <- function(year) {
   filePath <- getInvarFilePath(year)
   nc <- open.nc(filePath)
-  invarNames <- var.get.nc(nc, .global$invarDimensionName)
+  invarNames <- var.get.nc(nc, .infoInvar$invarDimensionName)
   close.nc(nc)
   return(invarNames)
 }
@@ -229,14 +229,14 @@ reverseArrayDim <- function(x, i) {
   DescTools::Rev(x, i)
 }
 
-getMaskValues <- function(regionName, onlyBoundingBox = TRUE) {
+getMaskValues <- function(info, regionName, onlyBoundingBox = TRUE) {
   mask <- list()
-  nc <- open.nc(.global$countryMaskPath)
+  nc <- open.nc(info$countryMaskPath)
   latIdx <- ncGetDimensionIndex(nc, "lat")
   mask$lonValues <- var.get.nc(nc, "lon")
   mask$latValues <- var.get.nc(nc, "lat")
   if (onlyBoundingBox) {
-    bbInfo <- .global$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
+    bbInfo <- info$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
     mask$values <- var.get.nc(
       nc,
       regionName,
@@ -271,7 +271,7 @@ checkInvar <- function(year, invarNames) {
   nc <- open.nc(filePath)
   invar$lonValues <- var.get.nc(nc, "lon")
   invar$latValues <- var.get.nc(nc, "lat")
-  invar$dimensionValues <- var.get.nc(nc, .global$invarDimensionName)
+  invar$dimensionValues <- var.get.nc(nc, .infoInvar$invarDimensionName)
   close.nc(nc)
   assertLonLat(invar$lonValues, invar$latValues)
   stopifnot(all(invarNames %in% invar$dimensionValues))
@@ -279,12 +279,12 @@ checkInvar <- function(year, invarNames) {
 }
 
 getInvarValues <- function(year, fromIdx, count, regionName) {
-  bbInfo <- .global$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
+  bbInfo <- .infoInvar$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
   filePath <- getInvarFilePath(year)
   nc <- open.nc(filePath)
   invarValues <- var.get.nc(
     nc,
-    .global$invarValueVariableName,
+    .infoInvar$invarValueVariableName,
     start = c(bbInfo$min_lon, bbInfo$min_lat, fromIdx),
     count = c(bbInfo$max_lon - bbInfo$min_lon + 1, bbInfo$max_lat - bbInfo$min_lat + 1, count),
     collapse = FALSE)
@@ -306,8 +306,8 @@ integrateDistribution <- function(distri, values) {
 
 getOutNcFilePath <- function(year) {
   file.path(
-    .global$outDir,
-    sprintf(.global$outNcFilePattern, year))
+    .infoInvar$outDir,
+    sprintf(.infoInvar$outNcFilePattern, year))
 }
 
 initOutNc <- function(years, regionNames, statisticNames) {
@@ -364,6 +364,6 @@ saveResult <- function(results, year, regionName, statisticName, variableNames) 
 
 getYears <- function() {
   intersect(
-    .global$popFileMeta$year,
-    .global$invarFileMeta$year)
+    .infoInvar$popFileMeta$year,
+    .infoInvar$invarFileMeta$year)
 }
