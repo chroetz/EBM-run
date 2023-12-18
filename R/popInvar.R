@@ -199,16 +199,15 @@ getPopValues <- function(info, year) {
   assertLonLat(pop$lonValues, pop$latValues)
 
   popValues <- ifelse(is.na(pop$values), 0, pop$values)
-  if (any(is.na(popValues))) {
-    message("WARNING: NAs in population values in year ", year)
-  }
 
   return(popValues)
 }
 
 subsetRegion <- function(info, valuesOnTotalGrid, regionName) {
   nf <- info$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
-  return(valuesOnTotalGrid[nf$min_lon:nf$max_lon, nf$min_lat:nf$max_lat, drop=FALSE])
+  len <- info$grid$latValues |> length()
+  reversedLat <- reverseIndex(nf$min_lat, nf$max_lat, len)
+  return(valuesOnTotalGrid[nf$min_lon:nf$max_lon, reversedLat$from:reversedLat$to, drop=FALSE])
 }
 
 getInvarFilePath <- function(year) {
@@ -227,6 +226,13 @@ getInvarNames <- function(year) {
 
 reverseArrayDim <- function(x, i) {
   DescTools::Rev(x, i)
+}
+
+reverseIndex <- function(from, to, len) {
+  list(
+    from = len - to + 1,
+    to = len - from + 1,
+    count = abs(from - to) + 1)
 }
 
 getMaskValues <- function(info, regionName, onlyBoundingBox = TRUE) {
@@ -281,12 +287,17 @@ checkInvar <- function(year, invarNames) {
 getInvarValues <- function(year, fromIdx, count, regionName) {
   bbInfo <- .infoInvar$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
   filePath <- getInvarFilePath(year)
+  # lat is reversed in the mask, i.e., also in the bounding box
   nc <- open.nc(filePath)
+  latCount <- bbInfo$max_lat - bbInfo$min_lat + 1
+  lonCount <- bbInfo$max_lon - bbInfo$min_lon + 1
+  len <- .infoInvar$grid$latValues |> length()
+  reversedLat <- reverseIndex(bbInfo$min_lat, bbInfo$max_lat, len)
   invarValues <- var.get.nc(
     nc,
     .infoInvar$invarValueVariableName,
-    start = c(bbInfo$min_lon, bbInfo$min_lat, fromIdx),
-    count = c(bbInfo$max_lon - bbInfo$min_lon + 1, bbInfo$max_lat - bbInfo$min_lat + 1, count),
+    start = c(bbInfo$min_lon, reversedLat$from, fromIdx),
+    count = c(lonCount, latCount, count),
     collapse = FALSE)
   close.nc(nc)
   if (any(is.na(invarValues))) {
