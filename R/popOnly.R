@@ -4,6 +4,7 @@
 setupPopSummation <- function(
   degStep,
   countryMaskPath,
+  maskScalingPath,
   boundingBoxPath,
   popDir,
   popFileNamePattern,
@@ -34,27 +35,8 @@ setupPopSummation <- function(
   return(invisible())
 }
 
-getMaskScaling <- function() {
-  # TODO: calculate this only once and save it.
-
-  pt <- proc.time()
-
-  cat("\tGet regions ... ")
-  regionNames <- getRegionNames(.infoPop)
-  cat("\t", length(regionNames), "regions to process.\n")
-
-  maskScalingValues <- NULL
-  for (regionName in regionNames) {
-    maskValues <- getMaskValues(.infoPop, regionName, onlyBoundingBox = FALSE)
-    if (is.null(maskScalingValues)) {
-      maskScalingValues <- maskValues
-    } else {
-      maskScalingValues <- maskScalingValues + maskValues
-    }
-  }
-
-  cat("\tgetMaskScaling duration:", (proc.time()-pt)[3], "s\n")
-
+getMaskScaling <- function(info) {
+  maskScalingValues <- readRDS(info$maskScalingPath)
   return(maskScalingValues)
 }
 
@@ -63,7 +45,7 @@ getMaskScaling <- function() {
 runPopSummation <- function(yearsFilter = NULL) {
 
   cat("Get Mask Scaling:")
-  maskScaling <- getMaskScaling()
+  maskScaling <- getMaskScaling(.infoPop)
   cat("\n")
 
   cat("Get years ... ")
