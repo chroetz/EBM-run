@@ -68,7 +68,7 @@ runPopSummation <- function(yearsFilter = NULL) {
         cat("\tRegion:", regionName, "\n")
         scaledPopValuesRegion <- subsetRegion(.infoPop, scaledPopValuesAll, regionName)
         maskValues <- getMaskValues(.infoPop, regionName)
-        value <- sum(maskValues * scaledPopValuesRegion)
+        value <- sum(maskValues * scaledPopValuesRegion, na.rm = TRUE)
         cat("\tprocessRegionYear duration:", (proc.time()-pt)[3], "s\n")
         return(value)
       },
