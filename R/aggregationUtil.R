@@ -43,13 +43,13 @@ getFullyFilledRegionNames <- function(info, year, invarNames, outNc) {
   if (any(!invarNames %in% variableNames)) {
     return(NULL)
   }
-  allData <- tryCatch(read.nc(outNc), error = \(cond) FALSE)
-  if (isFALSE(allData)) {
+  var1 <- tryCatch(var.inq.nc(outNc, 1), error = \(cond) FALSE)
+  if (isFALSE(var1)) {
     stop("The file ", outNcFilePath, " is corrupt! Probably need to delete it and run calculations again.")
   }
   hasNa <- sapply(
-    allData,
-    \(dat) rowSums(is.na(dat)) > 0)
+    invarNames,
+    \(invarName) rowSums(is.na(var.inq.nc(outNc, invarName, collapse=FALSE))) > 0)
   isRegionFilled <- rowSums(hasNa) == 0
   return(regionNames[isRegionFilled])
 }
