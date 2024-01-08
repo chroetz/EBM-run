@@ -63,7 +63,11 @@ setupPopWeightAggregationStatistics <- function(...) {
 
 
 #' @export
-runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NULL) {
+runPopWeightAggregation <- function(
+    yearsFilter = NULL,
+    invarNamesIdxFilter = NULL,
+    reopenMaskNc = FALSE
+) {
   cat("Get years ... ")
   years <- getYearsPop()
   if (!is.null(yearsFilter)) years <- intersect(years, yearsFilter)
@@ -137,8 +141,13 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
         outNc = outNc)
       cat("\tprocessRegionYear duration:", (proc.time()-pt)[3], "s\n")
 
-      close.nc(maskList$nc)
-      maskList$nc <- open.nc(.infoInvar$countryMaskPath)
+      # This seems necessary to avoid a memory leak...
+      if (reopenMaskNc) {
+        pt <- proc.time()
+        close.nc(maskList$nc)
+        maskList$nc <- open.nc(.infoInvar$countryMaskPath)
+        cat("\treopen mask nc duration:", (proc.time()-pt)[3], "s\n")
+      }
     }
 
     close.nc(outNc)
