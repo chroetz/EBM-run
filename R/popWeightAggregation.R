@@ -105,13 +105,16 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
     }
     for (regionName in regionNames) {
       cat("\tRegion:", regionName, "\n")
+      pt <- proc.time()
       maskValues <- getMaskValues(.infoInvar, regionName)
+      cat("\tcheck:", (proc.time()-pt)[3], "s\n")
       if (.infoInvar$weightByPop) {
         popValuesRegion <- subsetRegion(.infoInvar, popValuesAll, regionName)
         aggregationDistri <- calcPopRegionDistri(popValuesRegion, maskValues)
       } else {
         aggregationDistri <- maskValues
       }
+      cat("\tload mask duration:", (proc.time()-pt)[3], "s\n")
       pt <- proc.time()
       processRegionYear(
         regionName,
