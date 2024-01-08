@@ -145,7 +145,7 @@ runPopWeightAggregation <- function(
       if (reopenMaskNc) {
         pt <- proc.time()
         close.nc(maskList$nc)
-        maskList$nc <- open.nc(.infoInvar$countryMaskPath)
+        maskList$nc <- open.nc(.infoInvar$countryMaskPath, share=TRUE)
         cat("\treopen mask nc duration:", (proc.time()-pt)[3], "s\n")
       }
     }
