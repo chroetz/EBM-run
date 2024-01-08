@@ -17,17 +17,14 @@ processRegionYear <- function(regionName, year, invarNames, aggregationDistri, b
     cat("\t\tVariable indices from", min(idxs), "to", max(idxs), "\n")
     pt <- proc.time()
     invarValues <- getInvarValues(year, min(idxs), length(idxs), regionName) # this takes time
+    lobstr::obj_size(invarValues) |> print()
     cat("\t\t\tgetInvarValues() took", (proc.time()-pt)[3], "s\n")
     pt <- proc.time()
     for (statisticName in .infoInvar$statisticNames) {
       cat("\t\t\tStatistic:", statisticName, "...")
-      lobstr::mem_used() |> print()
       x <- calculateStatisticOnGrid(statisticName, invarValues)
-      lobstr::mem_used() |> print()
       results <- integrateDistribution(aggregationDistri, x)
-      lobstr::mem_used() |> print()
       saveResult(results, year, regionName, statisticName, invarNames[idxs], outNc=outNc)
-      lobstr::mem_used() |> print()
       cat(" Done.\n")
     }
     cat("\t\t\tcalculating and saving took", (proc.time()-pt)[3], "s\n")
