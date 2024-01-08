@@ -137,9 +137,8 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
         outNc = outNc)
       cat("\tprocessRegionYear duration:", (proc.time()-pt)[3], "s\n")
 
-      # TODO:
-      close.nc(outNc)
-      outNc <- open.nc(outNcFilePath, write = TRUE, share = FALSE)
+      close.nc(maskList$nc)
+      maskList$nc <- open.nc(.infoInvar$countryMaskPath)
     }
 
     close.nc(outNc)
