@@ -21,9 +21,13 @@ processRegionYear <- function(regionName, year, invarNames, aggregationDistri, b
     pt <- proc.time()
     for (statisticName in .infoInvar$statisticNames) {
       cat("\t\t\tStatistic:", statisticName, "...")
+      lobstr::mem_used() |> print()
       x <- calculateStatisticOnGrid(statisticName, invarValues)
+      lobstr::mem_used() |> print()
       results <- integrateDistribution(aggregationDistri, x)
+      lobstr::mem_used() |> print()
       saveResult(results, year, regionName, statisticName, invarNames[idxs], outNc=outNc)
+      lobstr::mem_used() |> print()
       cat(" Done.\n")
     }
     cat("\t\t\tcalculating and saving took", (proc.time()-pt)[3], "s\n")
@@ -226,6 +230,7 @@ saveResult <- function(results, year, regionName, statisticName, variableNames, 
       result,
       start = c(regionIdx, statisticIdx),
       count = c(1, 1))
+    lobstr::mem_used() |> print()
   }
 }
 
