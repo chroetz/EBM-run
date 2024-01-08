@@ -32,9 +32,14 @@ processRegionYear <- function(regionName, year, invarNames, aggregationDistri, b
 
 
 
-getFullyFilledRegionNames <- function(year, invarNames, outNc) {
+getFullyFilledRegionNames <- function(info, year, invarNames, outNc) {
   regionNames <- var.get.nc(outNc, "region")
   variableNames <- ncGetNonDimVariableNames(outNc)
+
+  if (!is.character(invarNames)) {
+    invarNames <- paste0(info$invarValueVariableName, "_", invarNames)
+  }
+
   if (any(!invarNames %in% variableNames)) {
     return(NULL)
   }
