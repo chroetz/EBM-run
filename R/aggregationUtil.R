@@ -17,7 +17,6 @@ processRegionYear <- function(regionName, year, invarNames, aggregationDistri, b
     cat("\t\tVariable indices from", min(idxs), "to", max(idxs), "\n")
     pt <- proc.time()
     invarValues <- getInvarValues(year, min(idxs), length(idxs), regionName) # this takes time
-    lobstr::obj_size(invarValues) |> print()
     cat("\t\t\tgetInvarValues() took", (proc.time()-pt)[3], "s\n")
     pt <- proc.time()
     for (statisticName in .infoInvar$statisticNames) {
@@ -227,7 +226,6 @@ saveResult <- function(results, year, regionName, statisticName, variableNames, 
       result,
       start = c(regionIdx, statisticIdx),
       count = c(1, 1))
-    lobstr::mem_used() |> print()
   }
 }
 

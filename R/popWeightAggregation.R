@@ -126,7 +126,6 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
       } else {
         aggregationDistri <- maskValues
       }
-      lobstr::obj_size(maskValues) |> print()
       cat("\tload mask duration:", (proc.time()-pt)[3], "s\n")
       pt <- proc.time()
       processRegionYear(
