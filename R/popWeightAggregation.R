@@ -106,7 +106,7 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
       next
     }
     checkInvar(year, invarNames)
-    fullyFilledRegionNames <- getFullyFilledRegionNames(year, invarNames)
+    fullyFilledRegionNames <- getFullyFilledRegionNames(year, invarNames, outNc=outNc)
     if (length(fullyFilledRegionNames) > 0) {
       cat(
         "\tFound",

@@ -23,7 +23,7 @@ processRegionYear <- function(regionName, year, invarNames, aggregationDistri, b
       cat("\t\t\tStatistic:", statisticName, "...")
       x <- calculateStatisticOnGrid(statisticName, invarValues)
       results <- integrateDistribution(aggregationDistri, x)
-      saveResult(results, year, regionName, statisticName, invarNames[idxs], outNc)
+      saveResult(results, year, regionName, statisticName, invarNames[idxs], outNc=outNc)
       cat(" Done.\n")
     }
     cat("\t\t\tcalculating and saving took", (proc.time()-pt)[3], "s\n")
@@ -32,16 +32,13 @@ processRegionYear <- function(regionName, year, invarNames, aggregationDistri, b
 
 
 
-getFullyFilledRegionNames <- function(year, invarNames) {
-  outNcFilePath <- getOutNcFilePath(year)
-  outNc <- open.nc(outNcFilePath, share = FALSE)
+getFullyFilledRegionNames <- function(year, invarNames, outNc) {
   regionNames <- var.get.nc(outNc, "region")
   variableNames <- ncGetNonDimVariableNames(outNc)
   if (any(!invarNames %in% variableNames)) {
     return(NULL)
   }
   allData <- tryCatch(read.nc(outNc), error = \(cond) FALSE)
-  close.nc(outNc)
   if (isFALSE(allData)) {
     stop("The file ", outNcFilePath, " is corrupt! Probably need to delete it and run calculations again.")
   }
