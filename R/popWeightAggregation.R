@@ -136,7 +136,7 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
         batchSize = .infoInvar$batchSize,
         outNc = outNc)
       cat("\tprocessRegionYear duration:", (proc.time()-pt)[3], "s\n")
-      gc(verbose = FALSE)
+      lobstr::mem_used() |> print()
     }
 
     close.nc(outNc)
