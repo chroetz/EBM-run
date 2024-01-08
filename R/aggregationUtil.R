@@ -103,42 +103,29 @@ reverseIndex <- function(from, to, len) {
     count = abs(from - to) + 1)
 }
 
-getMaskValues <- function(info, regionName, onlyBoundingBox = TRUE) {
-  mask <- list()
+getMaskValues <- function(info, regionName, maskList, onlyBoundingBox = TRUE) {
   pt <- proc.time()
-  nc <- open.nc(info$countryMaskPath)
-  cat("\t\topen:", (proc.time()-pt)[3], "s\n")
-  latIdx <- ncGetDimensionIndex(nc, "lat")
-  cat("\t\tncGetDimensionIndex:", (proc.time()-pt)[3], "s\n")
-  mask$lonValues <- var.get.nc(nc, "lon")
-  mask$latValues <- var.get.nc(nc, "lat")
-  cat("\t\tvar.get.nc lonlat:", (proc.time()-pt)[3], "s\n")
   if (onlyBoundingBox) {
     bbInfo <- info$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
-    mask$values <- var.get.nc(
-      nc,
+    values <- var.get.nc(
+      maskList$nc,
       regionName,
       start = c(bbInfo$min_lon, bbInfo$min_lat),
       count = c(bbInfo$max_lon - bbInfo$min_lon + 1, bbInfo$max_lat - bbInfo$min_lat + 1),
       collapse = FALSE)
   } else {
-    mask$values <- var.get.nc(nc, regionName)
+    values <- var.get.nc(maskList$nc, regionName)
   }
   cat("\t\tvar.get.nc regi:", (proc.time()-pt)[3], "s\n")
-  close.nc(nc)
-  cat("\t\tclose.nc:", (proc.time()-pt)[3], "s\n")
 
-  assertLonLat(mask$lonValues, rev(mask$latValues))
-  cat("\t\tassertLonLat:", (proc.time()-pt)[3], "s\n")
-
-  maskValues <- reverseArrayDim(mask$values, latIdx)
+  values <- reverseArrayDim(values, maskList$latIdx)
   cat("\t\treverseArrayDim:", (proc.time()-pt)[3], "s\n")
 
-  if (any(is.na(maskValues))) {
+  if (any(is.na(values))) {
     message("WARNING: NAs in mask values in region ", regionName)
   }
 
-  return(maskValues)
+  return(values)
 }
 
 

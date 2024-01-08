@@ -73,6 +73,15 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
   regionNames <- getRegionNames(.infoInvar)
   cat(length(regionNames), "regions to process.\n")
 
+  cat("Open and check mask NC-File ... ")
+  maskList <- list()
+  maskList$nc <- open.nc(.infoInvar$countryMaskPath)
+  maskList$lonValues <- var.get.nc(maskList$nc, "lon")
+  maskList$latValues <- var.get.nc(maskList$nc, "lat")
+  assertLonLat(maskList$lonValues, rev(maskList$latValues))
+  maskList$latIdx <- ncGetDimensionIndex(maskList$nc, "lat")
+  cat("Done.\n")
+
   cat("Initializing output files...\n")
   initOutNc(years, regionNames, .infoInvar$statisticNames)
   cat("Done.\n")
@@ -106,7 +115,7 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
     for (regionName in regionNames) {
       cat("\tRegion:", regionName, "\n")
       pt <- proc.time()
-      maskValues <- getMaskValues(.infoInvar, regionName)
+      maskValues <- getMaskValues(.infoInvar, regionName, maskList = maskList)
       cat("\tcheck:", (proc.time()-pt)[3], "s\n")
       if (.infoInvar$weightByPop) {
         popValuesRegion <- subsetRegion(.infoInvar, popValuesAll, regionName)
@@ -127,6 +136,10 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
     }
   }
   cat("End main loop.\n")
+
+  cat("Close mask NC-File ... ")
+  close.nc(maskList$nc)
+  cat("Done.\n")
 }
 
 
