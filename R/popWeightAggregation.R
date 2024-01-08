@@ -136,6 +136,10 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
         batchSize = .infoInvar$batchSize,
         outNc = outNc)
       cat("\tprocessRegionYear duration:", (proc.time()-pt)[3], "s\n")
+
+      # TODO:
+      close.nc(outNc)
+      outNc <- open.nc(outNcFilePath, write = TRUE, share = FALSE)
     }
 
     close.nc(outNc)
