@@ -101,7 +101,6 @@ reverseIndex <- function(from, to, len) {
 }
 
 getMaskValues <- function(info, regionName, maskList, onlyBoundingBox = TRUE) {
-  pt <- proc.time()
   if (onlyBoundingBox) {
     bbInfo <- info$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
     values <- var.get.nc(
@@ -113,10 +112,8 @@ getMaskValues <- function(info, regionName, maskList, onlyBoundingBox = TRUE) {
   } else {
     values <- var.get.nc(maskList$nc, regionName)
   }
-  cat("\t\tvar.get.nc regi:", (proc.time()-pt)[3], "s\n")
 
   values <- reverseArrayDim(values, maskList$latIdx)
-  cat("\t\treverseArrayDim:", (proc.time()-pt)[3], "s\n")
 
   if (any(is.na(values))) {
     message("WARNING: NAs in mask values in region ", regionName)
