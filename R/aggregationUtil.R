@@ -159,12 +159,15 @@ getInvarValues <- function(year, fromIdx, count, regionName) {
   invarValues <- var.get.nc(
     nc,
     .infoInvar$invarValueVariableName,
-    start = c(bbInfo$min_lon, reversedLat$from, fromIdx),
-    count = c(lonCount, latCount, count),
+    start = c(bbInfo$min_lon, reversedLat$from, fromIdx)[.infoInvar$lonLatVarToDimOrder],
+    count = c(lonCount, latCount, count)[.infoInvar$lonLatVarToDimOrder],
     collapse = FALSE)
   close.nc(nc)
   if (any(is.na(invarValues))) {
     message("WARNING: NAs in invar values in year ", year, ", `fromIdx` ", fromIdx, ", `count` ", count)
+  }
+  if (!all(.infoInvar$lonLatVarToDimOrder == 1:3)) {
+    invarValues <- aperm(invarValues, order(.infoInvar$lonLatVarToDimOrder))
   }
   stopifnot(length(dim(invarValues)) == 3)
   stopifnot(dim(invarValues)[3] == count)
@@ -222,6 +225,9 @@ saveResult <- function(results, year, regionName, statisticName, variableNames) 
   stopifnot(length(statisticIdx) == 1)
   for (i in seq_along(variableNames)) {
     variableName <- variableNames[[i]]
+    if (!is.character(variableName)) {
+      variableName <- paste0(.infoInvar$invarValueVariableName, "_", variableName)
+    }
     result <- results[[i]]
     if (!ncHasVariable(outNc, variableName)) {
       var.def.nc(outNc, variableName, "NC_DOUBLE", c("region", "statistic"), deflate = 9)

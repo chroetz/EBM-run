@@ -9,6 +9,7 @@ setupPopWeightAggregation <- function(
   invarFileNamePattern,
   invarDimensionName,
   invarValueVariableName,
+  lonLatVarToDimOrder = 1:3,
   outDir,
   outNcFilePattern,
   batchSize
