@@ -89,6 +89,10 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
   cat("Start main loop.\n")
   for (year in years) {
     cat("Year:", year, "\n")
+
+    outNcFilePath <- getOutNcFilePath(year)
+    outNc <- open.nc(outNcFilePath, write = TRUE, share = FALSE)
+
     if (.infoInvar$weightByPop) {
       popValuesAll <- getPopValues(.infoInvar, year)
     }
@@ -130,10 +134,13 @@ runPopWeightAggregation <- function(yearsFilter = NULL, invarNamesIdxFilter = NU
         year,
         invarNames,
         aggregationDistri,
-        batchSize = .infoInvar$batchSize)
+        batchSize = .infoInvar$batchSize,
+        outNc = outNc)
       cat("\tprocessRegionYear duration:", (proc.time()-pt)[3], "s\n")
       gc(verbose = FALSE)
     }
+
+    close.nc(outNc)
   }
   cat("End main loop.\n")
 

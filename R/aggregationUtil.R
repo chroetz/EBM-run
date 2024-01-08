@@ -1,7 +1,7 @@
 .infoInvar <- new.env()
 
 
-processRegionYear <- function(regionName, year, invarNames, aggregationDistri, batchSize) {
+processRegionYear <- function(regionName, year, invarNames, aggregationDistri, batchSize, outNc) {
   stopifnot(batchSize >= 1)
   n <- length(invarNames)
   nBatches <- ceiling(n/batchSize)
@@ -23,7 +23,7 @@ processRegionYear <- function(regionName, year, invarNames, aggregationDistri, b
       cat("\t\t\tStatistic:", statisticName, "...")
       x <- calculateStatisticOnGrid(statisticName, invarValues)
       results <- integrateDistribution(aggregationDistri, x)
-      saveResult(results, year, regionName, statisticName, invarNames[idxs])
+      saveResult(results, year, regionName, statisticName, invarNames[idxs], outNc)
       cat(" Done.\n")
     }
     cat("\t\t\tcalculating and saving took", (proc.time()-pt)[3], "s\n")
@@ -202,7 +202,7 @@ initOutNc <- function(years, regionNames, statisticNames) {
 }
 
 
-saveResult <- function(results, year, regionName, statisticName, variableNames) {
+saveResult <- function(results, year, regionName, statisticName, variableNames, outNc) {
   stopifnot(length(results) == length(variableNames))
   if (any(is.na(results))) {
     message(
@@ -211,8 +211,6 @@ saveResult <- function(results, year, regionName, statisticName, variableNames) 
       ", statistic ", statisticName,
       ", variables ", paste(variableNames[is.na(results)], collapse=", "))
   }
-  outNcFilePath <- getOutNcFilePath(year)
-  outNc <- open.nc(outNcFilePath, write = TRUE, share = FALSE)
   regionNames <- var.get.nc(outNc, "region")
   regionIdx <- which(regionName == regionNames)
   stopifnot(length(regionIdx) == 1)
@@ -235,6 +233,5 @@ saveResult <- function(results, year, regionName, statisticName, variableNames) 
       start = c(regionIdx, statisticIdx),
       count = c(1, 1))
   }
-  close.nc(outNc)
 }
 
