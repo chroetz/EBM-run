@@ -73,7 +73,7 @@ runPopSummation <- function(yearsFilter = NULL) {
         return(value)
       },
       double(1))
-    result <- tibble::tibble(
+    result <- tibble(
       year = year,
       region = regionNames,
       population = values)

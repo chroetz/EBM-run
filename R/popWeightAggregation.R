@@ -65,8 +65,7 @@ setupPopWeightAggregationStatistics <- function(...) {
 #' @export
 runPopWeightAggregation <- function(
     yearsFilter = NULL,
-    invarNamesIdxFilter = NULL,
-    reopenMaskNc = FALSE
+    invarNamesIdxFilter = NULL
 ) {
   cat("Get years ... ")
   years <- getYearsPop()
@@ -126,9 +125,9 @@ runPopWeightAggregation <- function(
       maskValues <- getMaskValues(.infoInvar, regionName, maskList = maskList)
       if (.infoInvar$weightByPop) {
         popValuesRegion <- subsetRegion(.infoInvar, popValuesAll, regionName)
-        aggregationDistri <- calcPopRegionDistri(popValuesRegion, maskValues)
+        aggregationDistri <- calculateProductDistribution(popValuesRegion, maskValues)
       } else {
-        aggregationDistri <- maskValues
+        aggregationDistri <- normalizeDistribution(maskValues)
       }
       cat("\tload mask duration:", (proc.time()-pt)[3], "s\n")
       pt <- proc.time()
@@ -140,14 +139,6 @@ runPopWeightAggregation <- function(
         batchSize = .infoInvar$batchSize,
         outNc = outNc)
       cat("\tprocessRegionYear duration:", (proc.time()-pt)[3], "s\n")
-
-      # This seems necessary to avoid a memory leak...
-      if (reopenMaskNc) {
-        pt <- proc.time()
-        close.nc(maskList$nc)
-        maskList$nc <- open.nc(.infoInvar$countryMaskPath, share=TRUE)
-        cat("\treopen mask nc duration:", (proc.time()-pt)[3], "s\n")
-      }
     }
 
     close.nc(outNc)
@@ -179,13 +170,6 @@ getPopValues <- function(info, year) {
   return(popValues)
 }
 
-
-calcPopRegionDistri <- function(popValues, maskValues) {
-  stopifnot(identical(dim(maskValues), dim(popValues)))
-  maskPop <- maskValues * popValues
-  maskPopDistri <- maskPop / pmax(1, sum(maskPop))
-  return(maskPopDistri)
-}
 
 
 

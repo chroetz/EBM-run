@@ -45,11 +45,12 @@ getFullyFilledRegionNames <- function(info, year, invarNames, outNc) {
   }
   var1 <- tryCatch(var.inq.nc(outNc, 1), error = \(cond) FALSE)
   if (isFALSE(var1)) {
+    outNcFilePath <- getOutNcFilePath(year)
     stop("The file ", outNcFilePath, " is corrupt! Probably need to delete it and run calculations again.")
   }
   hasNa <- sapply(
     invarNames,
-    \(invarName) rowSums(is.na(var.inq.nc(outNc, invarName, collapse=FALSE))) > 0)
+    \(invarName) rowSums(is.na(var.get.nc(outNc, invarName, collapse=FALSE))) > 0)
   isRegionFilled <- rowSums(hasNa) == 0
   return(regionNames[isRegionFilled])
 }
@@ -65,6 +66,25 @@ calculateStatisticOnGrid <- function(statisticName, invarValues) {
   .infoInvar$statisticFunctions[[statisticName]](invarValues)
 }
 
+
+
+calculateProductDistribution <- function(factor1, factor2, naToZero = TRUE) {
+  stopifnot(identical(dim(factor2), dim(factor1)))
+  product <- factor2 * factor1
+  distibution <- normalizeDistribution(product, naToZero = naToZero)
+  return(distibution)
+}
+
+
+normalizeDistribution <- function(unnormalizedDistribution, naToZero = TRUE) {
+  distibution <- unnormalizedDistribution / sum(unnormalizedDistribution, na.rm = TRUE)
+  if (naToZero) {
+    distibution[is.na(distibution)] <- 0
+  }
+  stopifnot(abs(sum(distibution) - 1) < sqrt(.Machine$double.eps))
+  return(distibution)
+}
+
 getRegionNames <- function(info) {
   nc <- open.nc(info$countryMaskPath)
   varNames <- ncGetNonDimVariableNames(nc)
@@ -74,7 +94,7 @@ getRegionNames <- function(info) {
 
 
 subsetRegion <- function(info, valuesOnTotalGrid, regionName) {
-  nf <- info$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
+  nf <- info$idxBoundingBoxes |> filter(.data$GID_1 == regionName) |> as.list()
   len <- info$grid$latValues |> length()
   reversedLat <- reverseIndex(nf$min_lat, nf$max_lat, len)
   return(valuesOnTotalGrid[nf$min_lon:nf$max_lon, reversedLat$from:reversedLat$to, drop=FALSE])
@@ -107,7 +127,7 @@ reverseIndex <- function(from, to, len) {
 
 getMaskValues <- function(info, regionName, maskList, onlyBoundingBox = TRUE) {
   if (onlyBoundingBox) {
-    bbInfo <- info$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
+    bbInfo <- info$idxBoundingBoxes |> filter(.data$GID_1 == regionName) |> as.list()
     values <- var.get.nc(
       maskList$nc,
       regionName,
@@ -143,7 +163,7 @@ checkInvar <- function(year, invarNames) {
 }
 
 getInvarValues <- function(year, fromIdx, count, regionName) {
-  bbInfo <- .infoInvar$idxBoundingBoxes |> dplyr::filter(GID_1 == regionName) |> as.list()
+  bbInfo <- .infoInvar$idxBoundingBoxes |> filter(.data$GID_1 == regionName) |> as.list()
   filePath <- getInvarFilePath(year)
   # lat is reversed in the mask, i.e., also in the bounding box
   nc <- open.nc(filePath)
