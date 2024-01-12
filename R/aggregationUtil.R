@@ -58,8 +58,8 @@ getFullyFilledRegionNames <- function(info, year, invarNames, outNc) {
 
 assertLonLat <- function(lonValues, latValues) {
   stopifnot(
-    max(abs(.info$grid$latValues - latValues)) < .info$eps,
-    max(abs(.info$grid$lonValues - lonValues)) < .info$eps)
+    max(abs(.info$grid$latValues - latValues)) < .info$gridTol,
+    max(abs(.info$grid$lonValues - lonValues)) < .info$gridTol)
 }
 
 calculateStatisticOnGrid <- function(statisticName, invarValues) {

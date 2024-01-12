@@ -15,7 +15,7 @@ setupPopSummation <- function(
     \(nm) assign(nm, env[[nm]], .info)
   )
 
-  .info$eps <- sqrt(.Machine$double.eps)
+  .info$gridTol <- degStep/10
 
   .info$grid <- list(
     lonValues = seq(-180, 180, by = degStep)[-1] - degStep/2,
