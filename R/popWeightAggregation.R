@@ -3,8 +3,7 @@ setupPopWeightAggregation <- function(
   degStep,
   maskPath,
   boundingBoxPath,
-  popDir = NULL,
-  popFileNamePattern = NULL,
+  popDataDescriptor = NULL,
   invarDir,
   invarFileNamePattern,
   invarDimensionName,
@@ -29,13 +28,8 @@ setupPopWeightAggregation <- function(
 
   .info$idxBoundingBoxes <- readr::read_csv(boundingBoxPath, col_types = readr::cols())
 
-  if (!is.null(popDir) && !is.null(popFileNamePattern)) {
-    popFileNames <- list.files(popDir, pattern=popFileNamePattern)
-    fileYears <- stringr::str_match(popFileNames, popFileNamePattern)[,2] |> as.integer()
-    .info$popFileMeta <- tibble(
-      year = fileYears,
-      name = popFileNames,
-      path = file.path(popDir, popFileNames))
+  if (!is.null(popDataDescriptor)) {
+    loadData("population", popDataDescriptor)
     .info$weightByPop <- TRUE
   } else {
     .info$weightByPop <- FALSE
