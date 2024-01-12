@@ -1,4 +1,4 @@
-.infoInvar <- new.env()
+.info <- new.env()
 
 
 processRegionYear <- function(regionName, year, invarNames, aggregationDistri, batchSize, outNc) {
@@ -19,7 +19,7 @@ processRegionYear <- function(regionName, year, invarNames, aggregationDistri, b
     invarValues <- getInvarValues(year, min(idxs), length(idxs), regionName) # this takes time
     cat("\t\t\tgetInvarValues() took", (proc.time()-pt)[3], "s\n")
     pt <- proc.time()
-    for (statisticName in .infoInvar$statisticNames) {
+    for (statisticName in .info$statisticNames) {
       cat("\t\t\tStatistic:", statisticName, "...")
       x <- calculateStatisticOnGrid(statisticName, invarValues)
       results <- integrateDistribution(aggregationDistri, x)
@@ -58,12 +58,12 @@ getFullyFilledRegionNames <- function(info, year, invarNames, outNc) {
 
 assertLonLat <- function(lonValues, latValues) {
   stopifnot(
-    max(abs(.infoInvar$grid$latValues - latValues)) < .infoInvar$eps,
-    max(abs(.infoInvar$grid$lonValues - lonValues)) < .infoInvar$eps)
+    max(abs(.info$grid$latValues - latValues)) < .info$eps,
+    max(abs(.info$grid$lonValues - lonValues)) < .info$eps)
 }
 
 calculateStatisticOnGrid <- function(statisticName, invarValues) {
-  .infoInvar$statisticFunctions[[statisticName]](invarValues)
+  .info$statisticFunctions[[statisticName]](invarValues)
 }
 
 
@@ -93,15 +93,15 @@ getRegionNames <- function(info) {
 }
 
 
-subsetRegion <- function(info, valuesOnTotalGrid, regionName) {
-  nf <- info$idxBoundingBoxes |> filter(.data$GID_1 == regionName) |> as.list()
-  len <- info$grid$latValues |> length()
+subsetRegion <- function(info, valuesOnTotalGrid, regionName, idxBoundingBoxes, grid) {
+  nf <- idxBoundingBoxes |> filter(.data$GID_1 == regionName) |> as.list()
+  len <- grid$latValues |> length()
   reversedLat <- reverseIndex(nf$min_lat, nf$max_lat, len)
   return(valuesOnTotalGrid[nf$min_lon:nf$max_lon, reversedLat$from:reversedLat$to, drop=FALSE])
 }
 
 getInvarFilePath <- function(year) {
-  fileInfo <- .infoInvar$invarFileMeta |> filter(.data$year == .env$year)
+  fileInfo <- .info$invarFileMeta |> filter(.data$year == .env$year)
   stopifnot(nrow(fileInfo) == 1)
   return(fileInfo$path)
 }
@@ -109,7 +109,7 @@ getInvarFilePath <- function(year) {
 getInvarNames <- function(year) {
   filePath <- getInvarFilePath(year)
   nc <- open.nc(filePath)
-  invarNames <- var.get.nc(nc, .infoInvar$invarDimensionName)
+  invarNames <- var.get.nc(nc, .info$invarDimensionName)
   close.nc(nc)
   return(invarNames)
 }
@@ -135,9 +135,9 @@ openAndCheckMaskNc <- function(maskPath) {
   return(maskList)
 }
 
-getMaskValues <- function(info, regionName, maskList, onlyBoundingBox = TRUE) {
-  if (onlyBoundingBox) {
-    bbInfo <- info$idxBoundingBoxes |> filter(.data$GID_1 == regionName) |> as.list()
+getMaskValues <- function(regionName, maskList, idxBoundingBoxes = NULL) {
+  if (!is.null(idxBoundingBoxes)) {
+    bbInfo <- idxBoundingBoxes |> filter(.data$GID_1 == regionName) |> as.list()
     values <- var.get.nc(
       maskList$nc,
       regionName,
@@ -165,7 +165,7 @@ checkInvar <- function(year, invarNames) {
   nc <- open.nc(filePath)
   invar$lonValues <- var.get.nc(nc, "lon")
   invar$latValues <- var.get.nc(nc, "lat")
-  invar$dimensionValues <- var.get.nc(nc, .infoInvar$invarDimensionName)
+  invar$dimensionValues <- var.get.nc(nc, .info$invarDimensionName)
   close.nc(nc)
   assertLonLat(invar$lonValues, invar$latValues)
   stopifnot(all(invarNames %in% invar$dimensionValues))
@@ -173,26 +173,26 @@ checkInvar <- function(year, invarNames) {
 }
 
 getInvarValues <- function(year, fromIdx, count, regionName) {
-  bbInfo <- .infoInvar$idxBoundingBoxes |> filter(.data$GID_1 == regionName) |> as.list()
+  bbInfo <- .info$idxBoundingBoxes |> filter(.data$GID_1 == regionName) |> as.list()
   filePath <- getInvarFilePath(year)
   # lat is reversed in the mask, i.e., also in the bounding box
   nc <- open.nc(filePath)
   latCount <- bbInfo$max_lat - bbInfo$min_lat + 1
   lonCount <- bbInfo$max_lon - bbInfo$min_lon + 1
-  len <- .infoInvar$grid$latValues |> length()
+  len <- .info$grid$latValues |> length()
   reversedLat <- reverseIndex(bbInfo$min_lat, bbInfo$max_lat, len)
   invarValues <- var.get.nc(
     nc,
-    .infoInvar$invarValueVariableName,
-    start = c(bbInfo$min_lon, reversedLat$from, fromIdx)[.infoInvar$lonLatVarToDimOrder],
-    count = c(lonCount, latCount, count)[.infoInvar$lonLatVarToDimOrder],
+    .info$invarValueVariableName,
+    start = c(bbInfo$min_lon, reversedLat$from, fromIdx)[.info$lonLatVarToDimOrder],
+    count = c(lonCount, latCount, count)[.info$lonLatVarToDimOrder],
     collapse = FALSE)
   close.nc(nc)
   if (any(is.na(invarValues))) {
     message("WARNING: NAs in invar values in year ", year, ", `fromIdx` ", fromIdx, ", `count` ", count)
   }
-  if (!all(.infoInvar$lonLatVarToDimOrder == 1:3)) {
-    invarValues <- aperm(invarValues, order(.infoInvar$lonLatVarToDimOrder))
+  if (!all(.info$lonLatVarToDimOrder == 1:3)) {
+    invarValues <- aperm(invarValues, order(.info$lonLatVarToDimOrder))
   }
   stopifnot(length(dim(invarValues)) == 3)
   stopifnot(dim(invarValues)[3] == count)
@@ -208,8 +208,8 @@ integrateDistribution <- function(distri, values) {
 
 getOutNcFilePath <- function(year) {
   file.path(
-    .infoInvar$outDir,
-    sprintf(.infoInvar$outNcFilePattern, year))
+    .info$outDir,
+    sprintf(.info$outNcFilePattern, year))
 }
 
 initOutNc <- function(years, regionNames, statisticNames) {
@@ -249,7 +249,7 @@ saveResult <- function(results, year, regionName, statisticName, variableNames, 
   for (i in seq_along(variableNames)) {
     variableName <- variableNames[[i]]
     if (!is.character(variableName)) {
-      variableName <- paste0(.infoInvar$invarValueVariableName, "_", variableName)
+      variableName <- paste0(.info$invarValueVariableName, "_", variableName)
     }
     result <- results[[i]]
     if (!ncHasVariable(outNc, variableName)) {

@@ -1,5 +1,3 @@
-.infoPop <- new.env()
-
 #' @export
 setupPopSummation <- function(
   degStep,
@@ -14,20 +12,20 @@ setupPopSummation <- function(
   env <- rlang::current_env()
   lapply(
     argNames,
-    \(nm) assign(nm, env[[nm]], .infoPop)
+    \(nm) assign(nm, env[[nm]], .info)
   )
 
-  .infoPop$eps <- sqrt(.Machine$double.eps)
+  .info$eps <- sqrt(.Machine$double.eps)
 
-  .infoPop$grid <- list(
+  .info$grid <- list(
     lonValues = seq(-180, 180, by = degStep)[-1] - degStep/2,
     latValues = seq(-90, 90, by = degStep)[-1] - degStep/2)
 
-  .infoPop$idxBoundingBoxes <- readr::read_csv(boundingBoxPath, col_types = readr::cols())
+  .info$idxBoundingBoxes <- readr::read_csv(boundingBoxPath, col_types = readr::cols())
 
   popFileNames <- list.files(popDir, pattern=popFileNamePattern)
   fileYears <- stringr::str_match(popFileNames, popFileNamePattern)[,2] |> as.integer()
-  .infoPop$popFileMeta <- tibble(
+  .info$popFileMeta <- tibble(
     year = fileYears,
     name = popFileNames,
     path = file.path(popDir, popFileNames))
@@ -45,33 +43,33 @@ getMaskScaling <- function(info) {
 runPopSummation <- function(yearsFilter = NULL) {
 
   cat("Get Mask Scaling:")
-  maskScaling <- getMaskScaling(.infoPop)
+  maskScaling <- getMaskScaling(.info)
   cat("\n")
 
   cat("Get years ... ")
-  years <- .infoPop$popFileMeta$year
+  years <- .info$popFileMeta$year
   if (!is.null(yearsFilter)) years <- intersect(years, yearsFilter)
   cat(length(years), "years to process.\n")
 
   cat("Get regions ... ")
-  regionNames <- getRegionNames(.infoPop)
+  regionNames <- getRegionNames(.info)
   cat(length(regionNames), "regions to process.\n")
 
   cat("Open and check mask NC-File ... ")
-  maskList <- openAndCheckMaskNc(.infoInvar$maskPath)
+  maskList <- openAndCheckMaskNc(.info$maskPath)
   cat("Done.\n")
 
   cat("Start main loop.\n")
   for (year in years) {
     cat("Year:", year, "\n")
-    scaledPopValuesAll <- getPopValues(.infoPop, year) / maskScaling
+    scaledPopValuesAll <- getPopValues(year, .info$popFileMeta) / maskScaling
     values <- vapply(
       regionNames,
       \(regionName) {
         pt <- proc.time()
         cat("\tRegion:", regionName, "\n")
-        scaledPopValuesRegion <- subsetRegion(.infoPop, scaledPopValuesAll, regionName)
-        maskValues <- getMaskValues(.infoPop, regionName, maskList)
+        scaledPopValuesRegion <- subsetRegion(scaledPopValuesAll, regionName, .info$idxBoundingBoxes, .info$grid)
+        maskValues <- getMaskValues(regionName, maskList, .info$idxBoundingBoxes)
         value <- sum(maskValues * scaledPopValuesRegion, na.rm = TRUE)
         cat("\tprocessRegionYear duration:", (proc.time()-pt)[3], "s\n")
         return(value)
@@ -81,7 +79,7 @@ runPopSummation <- function(yearsFilter = NULL) {
       year = year,
       region = regionNames,
       population = values)
-    readr::write_csv(result, sprintf(.infoPop$outFilePathPattern, year))
+    readr::write_csv(result, sprintf(.info$outFilePathPattern, year))
   }
   cat("End main loop.\n")
 

@@ -1,5 +1,3 @@
-.infoMask <- new.env()
-
 #' @export
 setupMaskSummation <- function(
   degStep,
@@ -10,12 +8,12 @@ setupMaskSummation <- function(
   env <- rlang::current_env()
   lapply(
     argNames,
-    \(nm) assign(nm, env[[nm]], .infoMask)
+    \(nm) assign(nm, env[[nm]], .info)
   )
 
-  .infoMask$eps <- sqrt(.Machine$double.eps)
+  .info$eps <- sqrt(.Machine$double.eps)
 
-  .infoMask$grid <- list(
+  .info$grid <- list(
     lonValues = seq(-180, 180, by = degStep)[-1] - degStep/2,
     latValues = seq(-90, 90, by = degStep)[-1] - degStep/2)
 
@@ -29,16 +27,16 @@ runMaskSummation <- function() {
   pt <- proc.time()
 
   cat("Get regions ... ")
-  regionNames <- getRegionNames(.infoMask)
+  regionNames <- getRegionNames(.info)
   cat(length(regionNames), "regions to process.\n")
 
   cat("Open and check mask NC-File ... ")
-  maskList <- openAndCheckMaskNc(.infoMask$maskPath)
+  maskList <- openAndCheckMaskNc(.info$maskPath)
   cat("Done.\n")
 
   maskScalingValues <- NULL
   for (regionName in regionNames) {
-    maskValues <- getMaskValues(.infoMask, regionName, onlyBoundingBox = FALSE)
+    maskValues <- getMaskValues(regionName, maskList)
     if (is.null(maskScalingValues)) {
       maskScalingValues <- maskValues
     } else {
@@ -54,8 +52,8 @@ runMaskSummation <- function() {
 
   cat("Save mask scaling values ... ")
   saveNetCdf(
-    .infoMask$outFilePath,
-    list(lon = .infoMask$grid$lonValues, lat = .infoMask$grid$latValues),
+    .info$outFilePath,
+    list(lon = .info$grid$lonValues, lat = .info$grid$latValues),
     maskScalingValues)
   cat("Done.\n")
 }
