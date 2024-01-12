@@ -1,6 +1,6 @@
 #' @export
 setupPopWeightAggregation <- function(
-  degStep,
+  targetFormat,
   maskPath,
   boundingBoxPath,
   popDataDescriptor = NULL,
@@ -8,7 +8,7 @@ setupPopWeightAggregation <- function(
   invarFileNamePattern,
   invarDimensionName,
   invarValueVariableName,
-  lonLatVarToDimOrder = 1:3, # TODO: ifer from file
+  lonLatVarToDimOrder = 1:3, # TODO: infer from file
   outDir,
   outNcFilePattern,
   batchSize
@@ -22,9 +22,7 @@ setupPopWeightAggregation <- function(
 
   .info$eps <- sqrt(.Machine$double.eps)
 
-  .info$grid <- list(
-    lonValues = seq(-180, 180, by = degStep)[-1] - degStep/2,
-    latValues = seq(-90, 90, by = degStep)[-1] - degStep/2)
+  initializeGrid(targetFormat)
 
   .info$idxBoundingBoxes <- readr::read_csv(boundingBoxPath, col_types = readr::cols())
 

@@ -1,8 +1,8 @@
-loadData <- function(name, dataDescriptor) {
+loadData <- function(name, dataDescriptor, targetVariable=NULL) {
   switch(
     dataDescriptor$type,
-    YearlyFiles = loadDataYearlyFiles(name, dataDescriptor),
-    SingleFile = loadDataSingleFile(name, dataDescriptor),
+    YearlyFiles = loadDataYearlyFiles(name, dataDescriptor, targetVariable),
+    SingleFile = loadDataSingleFile(name, dataDescriptor, targetVariable),
     stop("Unknown data descriptor type: ", dataDescriptor$type)
   )
   return(invisible())
@@ -61,7 +61,24 @@ loadDataSingleFile <- function(name, dataDescriptor, targetVariable = NULL) {
   timeDimName <- setdiff(dimNames, c("lon", "lat"))
   stopifnot(length(timeDimName) == 1)
   timeValues <- var.get.nc(nc, timeDimName)
-  timeUnitDescription <- att.get.nc(nc, timeDimName, "units")
+  timeVarInfo <- var.inq.nc(nc, timeDimName)
+
+  attNames <- sapply(
+    seq_len(timeVarInfo$natts)-1,
+    \(i) att.inq.nc(nc, timeDimName, i)$name)
+  if ("units" %in% attNames) {
+    timeUnitDescription <- att.get.nc(nc, timeDimName, "units")
+    pattern <- "^days since ([\\d-]+)( \\d{2}:\\d{2}:(\\d{2})?)?"
+    stopifnot(stingt::str_detect(timeUnitDescription, pattern))
+    startDayText <- stringr::str_match(timeUnitDescription, pattern)[,2]
+    startDate <- as.Date(startDayText)
+    years <- timeValues/365 + startYear
+    formattedStartDate <- format(lubridate::year(startDate), "%B %d, %Y")
+    cat("Assume that time values are days since ", formattedStartDate, ".\n")
+  } else {
+    years <- timeValues
+    cat("Assume that time values are years.\n")
+  }
 
   variableName <- ncGetNonDimVariableNames(nc)
   if (!is.null(targetVariable)) {
@@ -83,11 +100,7 @@ loadDataSingleFile <- function(name, dataDescriptor, targetVariable = NULL) {
 
   close.nc(nc)
 
-  startDayText <- stringr::str_match(timeUnitDescription, "^days since ([\\d-]+)( \\d{2}:\\d{2}:(\\d{2})?)?")[,2]
-  startYear <- startDayText |> as.Date() |> lubridate::year()
-  years <- timeValues/365 + startYear
-
-  stopifnot(max(abs(years - round(years))) > sqrt(.Machine$double.eps))
+  stopifnot(max(abs(years - round(years))) < sqrt(.Machine$double.eps))
 
   if (!"data" %in% names(.info)) .info$data <- list()
   .info$data[[name]] <- list(
@@ -108,10 +121,10 @@ loadDataSingleFile <- function(name, dataDescriptor, targetVariable = NULL) {
 checkLonLatInNcFile <- function(filePath) {
   nc <- open.nc(filePath)
   dimNames <- ncGetDimensionNames(nc)
-  close.nc(nc)
   stopifnot(c("lon", "lat") %in% dimNames)
   lonValues <- var.get.nc(nc, "lon")
   latValues <- var.get.nc(nc, "lat")
+  close.nc(nc)
   if (all(diff(lonValues) > 0)) lonIncreasing <- TRUE
   else if (all(diff(lonValues) < 0)) lonIncreasing <- FALSE
   else stop("Longitude values are neither increasing nor decreasing.")
@@ -137,11 +150,14 @@ getData <- function(name, year, setNaToZero = FALSE) {
   )
 
   # Make sure that lon and lat are increasing
-  if (!dataInfo$lonIncreasing) {
+  if (!dataInfo$lonIncreasing == .info$grid$lonIncreasing) {
     data <- reverseArrayDim(data, which(dimnames(data) |> names() == "lon"))
   }
-  if (!dataInfo$latIncreasing) {
+  if (!dataInfo$latIncreasing == .info$grid$latIncreasing) {
     data <- reverseArrayDim(data, which(dimnames(data) |> names() == "lat"))
+  }
+  if (!all(data |> dimnames() |> names() == .info$grid$orderedNames)) {
+    data <- t.default(data)
   }
 
   return(data)
