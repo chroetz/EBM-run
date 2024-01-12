@@ -29,11 +29,11 @@ runMaskSummation <- function() {
   pt <- proc.time()
 
   cat("Get regions ... ")
-  regionNames <- getRegionNames(.infoInvar)
+  regionNames <- getRegionNames(.infoMask)
   cat(length(regionNames), "regions to process.\n")
 
   cat("Open and check mask NC-File ... ")
-  maskList <- openAndCheckMaskNc(.infoInvar$maskPath)
+  maskList <- openAndCheckMaskNc(.infoMask$maskPath)
   cat("Done.\n")
 
   maskScalingValues <- NULL
