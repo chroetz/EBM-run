@@ -86,7 +86,7 @@ normalizeDistribution <- function(unnormalizedDistribution, naToZero = TRUE) {
 }
 
 getRegionNames <- function(info) {
-  nc <- open.nc(info$countryMaskPath)
+  nc <- open.nc(info$maskPath)
   varNames <- ncGetNonDimVariableNames(nc)
   close.nc(nc)
   return(varNames)
@@ -123,6 +123,16 @@ reverseIndex <- function(from, to, len) {
     from = len - to + 1,
     to = len - from + 1,
     count = abs(from - to) + 1)
+}
+
+openAndCheckMaskNc <- function(maskPath) {
+  maskList <- list()
+  maskList$nc <- open.nc(maskPath)
+  maskList$lonValues <- var.get.nc(maskList$nc, "lon")
+  maskList$latValues <- var.get.nc(maskList$nc, "lat")
+  assertLonLat(maskList$lonValues, rev(maskList$latValues))
+  maskList$latIdx <- ncGetDimensionIndex(maskList$nc, "lat")
+  return(maskList)
 }
 
 getMaskValues <- function(info, regionName, maskList, onlyBoundingBox = TRUE) {

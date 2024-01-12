@@ -3,7 +3,7 @@
 #' @export
 setupPopSummation <- function(
   degStep,
-  countryMaskPath,
+  maskPath,
   maskScalingPath,
   boundingBoxPath,
   popDir,
@@ -57,6 +57,10 @@ runPopSummation <- function(yearsFilter = NULL) {
   regionNames <- getRegionNames(.infoPop)
   cat(length(regionNames), "regions to process.\n")
 
+  cat("Open and check mask NC-File ... ")
+  maskList <- openAndCheckMaskNc(.infoInvar$maskPath)
+  cat("Done.\n")
+
   cat("Start main loop.\n")
   for (year in years) {
     cat("Year:", year, "\n")
@@ -67,7 +71,7 @@ runPopSummation <- function(yearsFilter = NULL) {
         pt <- proc.time()
         cat("\tRegion:", regionName, "\n")
         scaledPopValuesRegion <- subsetRegion(.infoPop, scaledPopValuesAll, regionName)
-        maskValues <- getMaskValues(.infoPop, regionName)
+        maskValues <- getMaskValues(.infoPop, regionName, maskList)
         value <- sum(maskValues * scaledPopValuesRegion, na.rm = TRUE)
         cat("\tprocessRegionYear duration:", (proc.time()-pt)[3], "s\n")
         return(value)
@@ -80,4 +84,8 @@ runPopSummation <- function(yearsFilter = NULL) {
     readr::write_csv(result, sprintf(.infoPop$outFilePathPattern, year))
   }
   cat("End main loop.\n")
+
+  cat("Close mask NC-File ... ")
+  close.nc(maskList$nc)
+  cat("Done.\n")
 }

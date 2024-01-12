@@ -3,7 +3,7 @@
 #' @export
 setupMaskSummation <- function(
   degStep,
-  countryMaskPath,
+  maskPath,
   outFilePath
 ) {
   argNames <- rlang::fn_fmls_names()
@@ -28,9 +28,13 @@ runMaskSummation <- function() {
 
   pt <- proc.time()
 
-  cat("\tGet regions ... ")
-  regionNames <- getRegionNames(.infoMask)
-  cat("\t", length(regionNames), "regions to process.\n")
+  cat("Get regions ... ")
+  regionNames <- getRegionNames(.infoInvar)
+  cat(length(regionNames), "regions to process.\n")
+
+  cat("Open and check mask NC-File ... ")
+  maskList <- openAndCheckMaskNc(.infoInvar$maskPath)
+  cat("Done.\n")
 
   maskScalingValues <- NULL
   for (regionName in regionNames) {
@@ -42,7 +46,16 @@ runMaskSummation <- function() {
     }
   }
 
-  cat("\tgetMaskScaling duration:", (proc.time()-pt)[3], "s\n")
+  cat("Close mask NC-File ... ")
+  close.nc(maskList$nc)
+  cat("Done.\n")
 
-  saveRDS(maskScalingValues, .infoMask$outFilePath)
+  cat("getMaskScaling duration:", (proc.time()-pt)[3], "s\n")
+
+  cat("Save mask scaling values ... ")
+  saveNetCdf(
+    .infoMask$outFilePath,
+    list(lon = .infoMask$grid$lonValues, lat = .infoMask$grid$latValues),
+    maskScalingValues)
+  cat("Done.\n")
 }

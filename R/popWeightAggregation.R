@@ -1,7 +1,7 @@
 #' @export
 setupPopWeightAggregation <- function(
   degStep,
-  countryMaskPath,
+  maskPath,
   boundingBoxPath,
   popDir = NULL,
   popFileNamePattern = NULL,
@@ -77,12 +77,7 @@ runPopWeightAggregation <- function(
   cat(length(regionNames), "regions to process.\n")
 
   cat("Open and check mask NC-File ... ")
-  maskList <- list()
-  maskList$nc <- open.nc(.infoInvar$countryMaskPath)
-  maskList$lonValues <- var.get.nc(maskList$nc, "lon")
-  maskList$latValues <- var.get.nc(maskList$nc, "lat")
-  assertLonLat(maskList$lonValues, rev(maskList$latValues))
-  maskList$latIdx <- ncGetDimensionIndex(maskList$nc, "lat")
+  maskList <- openAndCheckMaskNc(.infoInvar$maskPath)
   cat("Done.\n")
 
   cat("Initializing output files...\n")
@@ -169,8 +164,6 @@ getPopValues <- function(info, year) {
 
   return(popValues)
 }
-
-
 
 
 getYearsPop <- function() {
