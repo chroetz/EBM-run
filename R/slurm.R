@@ -32,11 +32,13 @@ callScriptSlurm <- function(
     #partition = c("priority", "io", "gpu", "largemem", "standard"), # Need to match qos to partitions...
     cpusPerTask = 1,
     timeInMinutes = NULL,
-    mail = TRUE
+    mail = TRUE,
+    logDir = "_log"
 ) {
   qos <- match.arg(qos)
   #partition <- match.arg(partition)
   stopifnot(isSlurmAvailable())
+  if (!dir.exists(logDir)) dir.create(logDir)
   for (args in argList) {
     jobName <- paste0(
       prefix, "_",
@@ -50,8 +52,8 @@ callScriptSlurm <- function(
       " --nodes=1 --ntasks=1",
       " --cpus-per-task=", cpusPerTask,
       " --job-name=", jobName,
-      " --output=", jobName, "_%j.out",
-      " --error=", jobName, "_%j.err",
+      " --output=", file.path(logDir, paste0(jobName, "_%j.out")),
+      " --error=", file.path(logDir, paste0(jobName, "_%j.err")),
       if (!is.null(timeInMinutes)) paste0(" --time ", timeInMinutes),
       if (mail) " --mail-type=END",
       " --wrap=\"Rscript '", scriptFilePath, "' ",
