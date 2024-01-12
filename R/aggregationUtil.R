@@ -85,8 +85,9 @@ normalizeDistribution <- function(unnormalizedDistribution, naToZero = TRUE) {
   return(distibution)
 }
 
-getRegionNames <- function(info) {
-  nc <- open.nc(info$maskPath)
+
+getRegionNames <- function(maskPath) {
+  nc <- open.nc(maskPath)
   varNames <- ncGetNonDimVariableNames(nc)
   close.nc(nc)
   return(varNames)
@@ -100,11 +101,13 @@ subsetRegion <- function(info, valuesOnTotalGrid, regionName, idxBoundingBoxes, 
   return(valuesOnTotalGrid[nf$min_lon:nf$max_lon, reversedLat$from:reversedLat$to, drop=FALSE])
 }
 
+
 getInvarFilePath <- function(year) {
   fileInfo <- .info$invarFileMeta |> filter(.data$year == .env$year)
   stopifnot(nrow(fileInfo) == 1)
   return(fileInfo$path)
 }
+
 
 getInvarNames <- function(year) {
   filePath <- getInvarFilePath(year)
@@ -114,9 +117,11 @@ getInvarNames <- function(year) {
   return(invarNames)
 }
 
+
 reverseArrayDim <- function(x, i) {
   DescTools::Rev(x, i)
 }
+
 
 reverseIndex <- function(from, to, len) {
   list(
@@ -124,6 +129,7 @@ reverseIndex <- function(from, to, len) {
     to = len - from + 1,
     count = abs(from - to) + 1)
 }
+
 
 openAndCheckMaskNc <- function(maskPath) {
   maskList <- list()
@@ -134,6 +140,7 @@ openAndCheckMaskNc <- function(maskPath) {
   maskList$latIdx <- ncGetDimensionIndex(maskList$nc, "lat")
   return(maskList)
 }
+
 
 getMaskValues <- function(regionName, maskList, idxBoundingBoxes = NULL) {
   if (!is.null(idxBoundingBoxes)) {
@@ -158,7 +165,6 @@ getMaskValues <- function(regionName, maskList, idxBoundingBoxes = NULL) {
 }
 
 
-
 checkInvar <- function(year, invarNames) {
   filePath <- getInvarFilePath(year)
   invar <- list()
@@ -171,6 +177,7 @@ checkInvar <- function(year, invarNames) {
   stopifnot(all(invarNames %in% invar$dimensionValues))
   return(invisible())
 }
+
 
 getInvarValues <- function(year, fromIdx, count, regionName) {
   bbInfo <- .info$idxBoundingBoxes |> filter(.data$GID_1 == regionName) |> as.list()
@@ -199,6 +206,7 @@ getInvarValues <- function(year, fromIdx, count, regionName) {
   return(invarValues)
 }
 
+
 integrateDistribution <- function(distri, values) {
   stopifnot(identical(dim(distri), dim(values)[1:2]))
   stopifnot(length(dim(values)) == 3)
@@ -206,11 +214,13 @@ integrateDistribution <- function(distri, values) {
   return(integral)
 }
 
+
 getOutNcFilePath <- function(year) {
   file.path(
     .info$outDir,
     sprintf(.info$outNcFilePattern, year))
 }
+
 
 initOutNc <- function(years, regionNames, statisticNames) {
   for (year in years) {

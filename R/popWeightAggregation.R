@@ -8,7 +8,7 @@ setupPopWeightAggregation <- function(
   invarFileNamePattern,
   invarDimensionName,
   invarValueVariableName,
-  lonLatVarToDimOrder = 1:3,
+  lonLatVarToDimOrder = 1:3, # TODO: ifer from file
   outDir,
   outNcFilePattern,
   batchSize
@@ -67,7 +67,7 @@ runPopWeightAggregation <- function(
   cat(length(years), "years to process.\n")
 
   cat("Get regions ... ")
-  regionNames <- getRegionNames(.info)
+  regionNames <- getRegionNames(.info$maskPath)
   cat(length(regionNames), "regions to process.\n")
 
   cat("Open and check mask NC-File ... ")
@@ -86,7 +86,7 @@ runPopWeightAggregation <- function(
     outNc <- open.nc(outNcFilePath, write = TRUE, share = FALSE)
 
     if (.info$weightByPop) {
-      popValuesAll <- getPopValues(year, .info$popFileMeta)
+      popValuesAll <- getData("population", year, setNaToZero = TRUE)
     }
     invarNames <- getInvarNames(year)
     if (!is.null(invarNamesIdxFilter)) {
@@ -140,31 +140,11 @@ runPopWeightAggregation <- function(
 }
 
 
-getPopValues <- function(year, popFileMeta) {
-  fileInfo <-
-    popFileMeta |>
-    filter(.data$year == .env$year)
-  stopifnot(nrow(fileInfo) == 1)
-  pop <- list()
-  nc <- open.nc(fileInfo$path)
-  pop$lonValues <- var.get.nc(nc, "lon")
-  pop$latValues <- var.get.nc(nc, "lat")
-  pop$values <- var.get.nc(nc, "total-population")
-  close.nc(nc)
-
-  assertLonLat(pop$lonValues, pop$latValues)
-
-  popValues <- ifelse(is.na(pop$values), 0, pop$values)
-
-  return(popValues)
-}
-
-
 getYearsPop <- function() {
   if (.info$weightByPop) {
     return(
       intersect(
-        .info$popFileMeta$year,
+        .info$data$population$years,
         .info$invarFileMeta$year))
   } else {
     return(.info$invarFileMeta$year)

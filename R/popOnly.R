@@ -52,7 +52,7 @@ runPopSummation <- function(yearsFilter = NULL) {
   cat(length(years), "years to process.\n")
 
   cat("Get regions ... ")
-  regionNames <- getRegionNames(.info)
+  regionNames <- getRegionNames(.info$maskPath)
   cat(length(regionNames), "regions to process.\n")
 
   cat("Open and check mask NC-File ... ")
@@ -62,7 +62,7 @@ runPopSummation <- function(yearsFilter = NULL) {
   cat("Start main loop.\n")
   for (year in years) {
     cat("Year:", year, "\n")
-    scaledPopValuesAll <- getPopValues(year, .info$popFileMeta) / maskScaling
+    scaledPopValuesAll <- getData("population", year, setNaToZero = TRUE) / maskScaling
     values <- vapply(
       regionNames,
       \(regionName) {
