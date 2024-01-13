@@ -3,8 +3,9 @@
 #' @export
 setupPopWeightAggregation <- function(
   targetFormat,
-  maskPath,
-  boundingBoxPath,
+  maskFilePath,
+  maskSumFilePath,
+  boundingBoxFilePath,
   popDataDescriptor = NULL,
   invarDir,
   invarFileNamePattern,
@@ -22,11 +23,11 @@ setupPopWeightAggregation <- function(
     \(nm) assign(nm, env[[nm]], .info)
   )
 
-  .info$eps <- sqrt(.Machine$double.eps)
-
   initializeGrid(targetFormat)
 
-  .info$idxBoundingBoxes <- readr::read_csv(boundingBoxPath, col_types = readr::cols())
+  openAndCheckMaskFile(maskFilePath)
+  readBoundingBoxes(boundingBoxFilePath)
+  readMaskSum(maskSumFilePath)
 
   if (!is.null(popDataDescriptor)) {
     loadData("population", popDataDescriptor)
@@ -59,20 +60,17 @@ setupPopWeightAggregationStatistics <- function(...) {
 #' @export
 runPopWeightAggregation <- function(
     yearsFilter = NULL,
-    invarNamesIdxFilter = NULL
+    invarNamesIdxFilter = NULL,
+    regionIndices = NULL
 ) {
-  cat("Get years ... ")
+
   years <- getYearsPop()
   if (!is.null(yearsFilter)) years <- intersect(years, yearsFilter)
   cat(length(years), "years to process.\n")
 
-  cat("Get regions ... ")
-  regionNames <- getRegionNames(.info$maskPath)
+  regionNames <- .info$maskList$regionNames
+  if (!is.null(regionIndices)) regionNames <- regionNames[regionIndices]
   cat(length(regionNames), "regions to process.\n")
-
-  cat("Open and check mask NC-File ... ")
-  maskList <- openAndCheckMaskNc(.info$maskPath)
-  cat("Done.\n")
 
   cat("Initializing output files...\n")
   initOutNc(years, regionNames, .info$statisticNames)
@@ -111,7 +109,7 @@ runPopWeightAggregation <- function(
     for (regionName in regionNames) {
       cat("\tRegion:", regionName, "\n")
       pt <- proc.time()
-      maskValues <- getMaskValues(regionName, maskList, .info$idxBoundingBoxes)
+      maskValues <- getMaskValues(regionName, .info$maskList, .info$idxBoundingBoxes)
       if (.info$weightByPop) {
         popValuesRegion <- subsetRegion(popValuesAll, regionName, .info$idxBoundingBoxes, .info$grid)
         aggregationDistri <- calculateProductDistribution(popValuesRegion, maskValues)
@@ -135,7 +133,7 @@ runPopWeightAggregation <- function(
   cat("End main loop.\n")
 
   cat("Close mask NC-File ... ")
-  close.nc(maskList$nc)
+  close.nc(.info$maskList$nc)
   cat("Done.\n")
 }
 

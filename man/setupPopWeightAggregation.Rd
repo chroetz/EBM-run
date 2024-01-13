@@ -6,8 +6,9 @@
 \usage{
 setupPopWeightAggregation(
   targetFormat,
-  maskPath,
-  boundingBoxPath,
+  maskFilePath,
+  maskSumFilePath,
+  boundingBoxFilePath,
   popDataDescriptor = NULL,
   invarDir,
   invarFileNamePattern,

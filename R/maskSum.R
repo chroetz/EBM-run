@@ -14,6 +14,8 @@ setupMaskSummation <- function(
   gridFormat <- getNativeGridFormat(maskFilePath)
   initializeGrid(gridFormat)
 
+  openAndCheckMaskFile(maskFilePath)
+
   return(invisible())
 }
 
@@ -23,19 +25,14 @@ runMaskSummation <- function() {
 
   pt <- proc.time()
 
-  cat("Get regions ... ")
-  regionNames <- getRegionNames(.info$maskPath)
+  regionNames <- .info$maskList$regionNames
   cat(length(regionNames), "regions to process.\n")
-
-  cat("Open and check mask NC-File ... ")
-  maskList <- openAndCheckMaskNc(.info$maskPath)
-  cat("Done.\n")
 
   maskScalingValues <- NULL
   for (regionName in regionNames) {
     pt <- proc.time()
     cat("Process region '", regionName, "' ... ", sep="")
-    maskValues <- getMaskValues(regionName, maskList)
+    maskValues <- getMaskValues(regionName, .info$maskList)
     if (is.null(maskScalingValues)) {
       maskScalingValues <- maskValues
     } else {
@@ -45,7 +42,7 @@ runMaskSummation <- function() {
   }
 
   cat("Close mask NC-File ... ")
-  close.nc(maskList$nc)
+  close.nc(.info$maskList$nc)
   cat("Done.\n")
 
   cat("getMaskScaling duration:", (proc.time()-pt)[3], "s\n")
