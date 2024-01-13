@@ -1,3 +1,5 @@
+#' Setup for runPopWeightAggregation().
+#' @param targetFormat An object of class GridFormat as created by createGridFormat().
 #' @export
 setupPopWeightAggregation <- function(
   targetFormat,

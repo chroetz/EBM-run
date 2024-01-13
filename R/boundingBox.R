@@ -1,7 +1,47 @@
 #' @export
-saveBoundingBoxes <- function(boundingBoxes, outFilePath, regionColumnName = "GID_1") {
-  tbl <- as_tibble(t(boundingBoxes), rownames = regionColumnName)
-  readr::write_csv(tbl, outFilePath)
+saveBoundingBoxes <- function(
+    boundingBoxes,
+    outFilePath,
+    maskFilePath,
+    regionVariableName
+  ) {
+
+  maskNc <- open.nc(maskFilePath)
+  on.exit(close.nc(maskNc))
+
+  outNc <- create.nc(outFilePath)
+  on.exit(close.nc(outNc))
+
+  # copy dimensions from maskNc to outNc
+  for (i in seq_len(file.inq.nc(maskNc)$ndims)) {
+    dimInfo <- dim.inq.nc(maskNc, i - 1)
+    varInfo <- dim.inq.nc(maskNc, dimInfo$name)
+    dim.def.nc(outNc, dimInfo$name, dimInfo$length)
+    var.def.nc(outNc, dimInfo$name, varInfo$type, dimInfo$name)
+    var.put.nc(outNc, dimInfo$name, var.get.nc(maskNc, dimInfo$name))
+    for (j in seq_len(dimInfo$natts)) {
+      attInfo <- att.inq.nc(maskNc, dimInfo$name, j - 1)
+      att.put.nc(
+        outNc,
+        dimInfo$name,
+        attInfo$name,
+        attInfo$type,
+        att.get.nc(maskNc, dimInfo$name, attInfo$name))
+    }
+  }
+
+  # create regions dimension
+  regions <- colnames(boundingBoxes)
+  dim.def.nc(outNc, regionVariableName, length(regions))
+  var.def.nc(outNc, regionVariableName, "NC_STRING", regionVariableName)
+  var.put.nc(outNc, regionVariableName, regions)
+
+  # put bounding boxes values into outNc
+  for (i in seq_len(nrow(boundingBoxes))) {
+    varName <- rownames(boundingBoxes)[i]
+    var.def.nc(outNc, varName, "NC_DOUBLE", regionVariableName)
+    var.put.nc(outNc, varName, boundingBoxes[i, ])
+  }
 }
 
 #' @export
@@ -10,12 +50,17 @@ getBoundingBoxesFromMask <- function(path) {
   on.exit(close.nc(nc))
   fileInfo <- file.inq.nc(nc)
   stopifnot(fileInfo$ndims == 2)
+  ndims <- 2
   dimNames <- c(dim.inq.nc(nc, 0)$name, dim.inq.nc(nc, 1)$name)
   boundingBoxes <- sapply(
-    seq_len(fileInfo$nvars-2),
+    seq_len(fileInfo$nvars - ndims),
     \(i) {
-      mask <- var.get.nc(nc, 1 + i)
-      getBoundingBox(mask)
+      cat("Processing region ", i, "... ")
+      pt <- proc.time()
+      mask <- var.get.nc(nc, ndims + i - 1)
+      bbox <- getBoundingBox(mask)
+      cat("done in ", (proc.time() - pt)[3], "s.\n")
+      return(bbox)
     })
   rownames(boundingBoxes) <- c(
     paste0("min_", dimNames[1]),
