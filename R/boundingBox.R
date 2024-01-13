@@ -9,7 +9,7 @@ saveBoundingBoxes <- function(
   maskNc <- open.nc(maskFilePath)
   on.exit(close.nc(maskNc))
 
-  outNc <- create.nc(outFilePath)
+  outNc <- create.nc(outFilePath, format = "netcdf4", share = FALSE)
   on.exit(close.nc(outNc))
 
   # copy dimensions from maskNc to outNc
