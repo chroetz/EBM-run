@@ -19,7 +19,7 @@ saveBoundingBoxes <- function(
     dim.def.nc(outNc, dimInfo$name, dimInfo$length)
     var.def.nc(outNc, dimInfo$name, varInfo$type, dimInfo$name)
     var.put.nc(outNc, dimInfo$name, var.get.nc(maskNc, dimInfo$name))
-    for (j in seq_len(dimInfo$natts)) {
+    for (j in seq_len(varInfo$natts)) {
       attInfo <- att.inq.nc(maskNc, dimInfo$name, j - 1)
       att.put.nc(
         outNc,
