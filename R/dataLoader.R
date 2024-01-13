@@ -69,11 +69,12 @@ loadDataSingleFile <- function(name, dataDescriptor, targetVariable = NULL) {
   if ("units" %in% attNames) {
     timeUnitDescription <- att.get.nc(nc, timeDimName, "units")
     pattern <- "^days since ([\\d-]+)( \\d{2}:\\d{2}:(\\d{2})?)?"
-    stopifnot(stingt::str_detect(timeUnitDescription, pattern))
+    stopifnot(stringr::str_detect(timeUnitDescription, pattern))
     startDayText <- stringr::str_match(timeUnitDescription, pattern)[,2]
     startDate <- as.Date(startDayText)
+    startYear <- lubridate::year(startDate)
     years <- timeValues/365 + startYear
-    formattedStartDate <- format(lubridate::year(startDate), "%B %d, %Y")
+    formattedStartDate <- format(startYear, "%B %d, %Y")
     cat("Assume that time values are days since ", formattedStartDate, ".\n")
   } else {
     years <- timeValues

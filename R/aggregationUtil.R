@@ -241,36 +241,6 @@ initOutNc <- function(years, regionNames, statisticNames) {
 }
 
 
-initializeGrid <- function(targetFormat) {
-  .info$gridTol <- targetFormat$degStep / 10
-  .info$grid <- c(
-    targetFormat,
-    list(
-      increasingLonValues = seq(-180, 180, by = targetFormat$degStep)[-1] - targetFormat$degStep/2,
-      increasingLatValues = seq(-90, 90, by = targetFormat$degStep)[-1] - targetFormat$degStep/2,
-      orderedNames = if (targetFormat$lonFirst) c("lon", "lat") else c("lat", "lon")
-    )
-  )
-  if (targetFormat$lonIncreasing) {
-    .info$grid$lonValues <- .info$grid$increasingLonValues
-  } else {
-    .info$grid$lonValues <- .info$grid$increasingLonValues |> rev()
-  }
-  if (targetFormat$latIncreasing) {
-    .info$grid$latValues <- .info$grid$increasingLatValues
-  } else {
-    .info$grid$latValues <- .info$grid$increasingLatValues |> rev()
-  }
-  cat(
-    "Target Grid:",
-    if (targetFormat$lonFirst) {
-      paste0("lon x lat : ", length(.info$grid$lonValues), " x ", length(.info$grid$latValues))
-    } else {
-      paste0("lat x lon : ", length(.info$grid$latValues), " x ", length(.info$grid$lonValues))
-    },
-    "with lon in", if (targetFormat$lonIncreasing) "increasing" else "decreasing", "order",
-    "and lat in", if (targetFormat$latIncreasing) "increasing" else "decreasing", "order.\n")
-}
 
 
 saveResult <- function(results, year, regionName, statisticName, variableNames, outNc) {
