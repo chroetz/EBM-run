@@ -3,7 +3,7 @@ saveBoundingBoxes <- function(
     boundingBoxes,
     outFilePath,
     maskFilePath,
-    regionVariableName
+    regionVariableName = "regionName"
   ) {
 
   maskNc <- open.nc(maskFilePath)

@@ -86,19 +86,26 @@ normalizeDistribution <- function(unnormalizedDistribution, naToZero = TRUE) {
 }
 
 
-getRegionNames <- function(maskPath) {
-  nc <- open.nc(maskPath)
-  varNames <- ncGetNonDimVariableNames(nc)
-  close.nc(nc)
-  return(varNames)
+getSingleBoundingBox <- function(boundingBoxes, regionName) {
+  boundingBoxIndex <- which(boundingBoxes$GID_1 == regionName)
+  stopifnot(length(boundingBoxIndex) == 1)
+  nms <- c("min_lon", "max_lon", "min_lat", "max_lat")
+  bbInfo <- lapply(nms, \(nm) boundingBoxes[[nm]][boundingBoxIndex])
+  names(bbInfo) <- nms
+  return(bbInfo)
 }
 
 
-subsetRegion <- function(info, valuesOnTotalGrid, regionName, idxBoundingBoxes, grid) {
-  nf <- idxBoundingBoxes |> filter(.data$GID_1 == regionName) |> as.list()
+subsetRegion <- function(valuesOnTotalGrid, regionName, boundingBoxes, grid) {
+  bbInfo <- getSingleBoundingBox(boundingBoxes, regionName)
   len <- grid$latValues |> length()
-  reversedLat <- reverseIndex(nf$min_lat, nf$max_lat, len)
-  return(valuesOnTotalGrid[nf$min_lon:nf$max_lon, reversedLat$from:reversedLat$to, drop=FALSE])
+  # TODO: check whether one needs to reverse the lat values
+  reversedLat <- reverseIndex(bbInfo$min_lat, bbInfo$max_lat, len)
+  res <- valuesOnTotalGrid[
+    bbInfo$min_lon:bbInfo$max_lon,
+    reversedLat$from:reversedLat$to,
+    drop=FALSE]
+  return(res)
 }
 
 
@@ -131,20 +138,24 @@ reverseIndex <- function(from, to, len) {
 }
 
 
-openAndCheckMaskNc <- function(maskPath) {
+openAndCheckMaskFile <- function(filePath) {
   maskList <- list()
-  maskList$nc <- open.nc(maskPath)
-  maskList$lonValues <- var.get.nc(maskList$nc, "lon")
-  maskList$latValues <- var.get.nc(maskList$nc, "lat")
+  nc <- open.nc(filePath)
+  maskList$nc <- nc
+  maskList$lonValues <- var.get.nc(nc, "lon")
+  maskList$latValues <- var.get.nc(nc, "lat")
   assertLonLat(maskList$lonValues, rev(maskList$latValues))
-  maskList$latIdx <- ncGetDimensionIndex(maskList$nc, "lat")
-  return(maskList)
+  maskList$lonLatIdx <-
+    c(lon = ncGetDimensionIndex(nc, "lon"),
+      lat = ncGetDimensionIndex(nc, "lat"))
+  maskList$regionNames <- ncGetNonDimVariableNames(nc)
+  .info$maskList <- maskList
 }
 
 
-getMaskValues <- function(regionName, maskList, idxBoundingBoxes = NULL) {
-  if (!is.null(idxBoundingBoxes)) {
-    bbInfo <- idxBoundingBoxes |> filter(.data$GID_1 == regionName) |> as.list()
+getMaskValues <- function(regionName, maskList, boundingBoxes = NULL) {
+  if (!is.null(boundingBoxes)) {
+    bbInfo <- getSingleBoundingBox(boundingBoxes, regionName)
     values <- var.get.nc(
       maskList$nc,
       regionName,
@@ -155,7 +166,7 @@ getMaskValues <- function(regionName, maskList, idxBoundingBoxes = NULL) {
     values <- var.get.nc(maskList$nc, regionName)
   }
 
-  values <- reverseArrayDim(values, maskList$latIdx)
+  values <- reverseArrayDim(values, maskList$lonLatIdx["lat"])
 
   if (any(is.na(values))) {
     message("WARNING: NAs in mask values in region ", regionName)
@@ -274,5 +285,22 @@ saveResult <- function(results, year, regionName, statisticName, variableNames, 
       start = c(regionIdx, statisticIdx),
       count = c(1, 1))
   }
+}
+
+
+
+readBoundingBoxes <- function(filePath) {
+  nc <- open.nc(filePath)
+  on.exit(close.nc(nc))
+  .info$boundingBoxes <- read.nc(nc)
+  # TODO: check GridFormat
+}
+
+
+readMaskSum <- function(filePath) {
+  nc <- open.nc(filePath)
+  on.exit(close.nc(nc))
+  .info$maskSum <- read.nc(nc)
+  # TODO: check GridFormat
 }
 

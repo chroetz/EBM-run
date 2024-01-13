@@ -74,8 +74,9 @@ loadDataSingleFile <- function(name, dataDescriptor, targetVariable = NULL) {
     startDate <- as.Date(startDayText)
     startYear <- lubridate::year(startDate)
     years <- timeValues/365 + startYear
-    formattedStartDate <- format(startYear, "%B %d, %Y")
-    cat("Assume that time values are days since ", formattedStartDate, ".\n")
+    formattedStartDate <- format(startDate, "%B %d, %Y")
+    cat(
+      "Assume that time values are days since year", startYear, "(", formattedStartDate, ").\n")
   } else {
     years <- timeValues
     cat("Assume that time values are years.\n")
@@ -230,5 +231,11 @@ permuteDimIds <- function(dataInfo, lonLatTimeVec) {
   permuter <- dataInfo$dimNames[dataInfo$varDimIds+1]
   permutedVec <- lonLatTimeVec[permuter]
   return(permutedVec)
+}
+
+
+getDataYears <- function(name) {
+  dataInfo <- .info$data[[name]]
+  return(dataInfo$years)
 }
 
