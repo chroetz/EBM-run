@@ -1,21 +1,18 @@
 #' @export
 setupMaskSummation <- function(
-  degStep,
-  maskPath,
+  maskFilePath,
   outFilePath
 ) {
+
+  # put function arguments into environment .info
   argNames <- rlang::fn_fmls_names()
   env <- rlang::current_env()
   lapply(
     argNames,
-    \(nm) assign(nm, env[[nm]], .info)
-  )
+    \(nm) assign(nm, env[[nm]], .info))
 
-  .info$eps <- sqrt(.Machine$double.eps)
-
-  .info$grid <- list(
-    lonValues = seq(-180, 180, by = degStep)[-1] - degStep/2,
-    latValues = seq(-90, 90, by = degStep)[-1] - degStep/2)
+  gridFormat <- getNativeGridFormat(maskFilePath)
+  initializeGrid(gridFormat)
 
   return(invisible())
 }

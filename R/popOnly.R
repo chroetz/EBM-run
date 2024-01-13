@@ -1,6 +1,6 @@
 #' @export
 setupPopSummation <- function(
-  degStep,
+  targetFormat,
   maskPath,
   maskScalingPath,
   boundingBoxPath,
@@ -15,11 +15,7 @@ setupPopSummation <- function(
     \(nm) assign(nm, env[[nm]], .info)
   )
 
-  .info$gridTol <- degStep/10
-
-  .info$grid <- list(
-    lonValues = seq(-180, 180, by = degStep)[-1] - degStep/2,
-    latValues = seq(-90, 90, by = degStep)[-1] - degStep/2)
+  initializeGrid(targetFormat)
 
   .info$idxBoundingBoxes <- readr::read_csv(boundingBoxPath, col_types = readr::cols())
 

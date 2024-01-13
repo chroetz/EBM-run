@@ -4,20 +4,18 @@
 \alias{createGridFormat}
 \title{GridFormat class}
 \usage{
-createGridFormat(degStep, lonFirst, lonIncreasing, latIncreasing)
+createGridFormat(nLon, nLat, lonIncreasing, latIncreasing, lonFirst)
 }
 \arguments{
-\item{degStep}{The degree step of the grid.}
+\item{nLon, nLat}{Number of longitude and latitude values.}
+
+\item{lonIncreasing, latIncreasing}{Whether the longitude/latitude values are in increasing order.}
 
 \item{lonFirst}{Whether the longitude is the first dimension.}
-
-\item{lonIncreasing}{Whether the longitude values are in increasing order.}
-
-\item{latIncreasing}{Whether the latitude values are in increasing order.}
 }
 \description{
 A class to store the format of a longitude - latitude grid of the globe.
 }
 \examples{
-createGridFormat(1, TRUE, TRUE, TRUE)
+createGridFormat(20, 10, TRUE, TRUE, TRUE)
 }
