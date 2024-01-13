@@ -15,7 +15,7 @@ saveBoundingBoxes <- function(
   # copy dimensions from maskNc to outNc
   for (i in seq_len(file.inq.nc(maskNc)$ndims)) {
     dimInfo <- dim.inq.nc(maskNc, i - 1)
-    varInfo <- dim.inq.nc(maskNc, dimInfo$name)
+    varInfo <- var.inq.nc(maskNc, dimInfo$name)
     dim.def.nc(outNc, dimInfo$name, dimInfo$length)
     var.def.nc(outNc, dimInfo$name, varInfo$type, dimInfo$name)
     var.put.nc(outNc, dimInfo$name, var.get.nc(maskNc, dimInfo$name))
