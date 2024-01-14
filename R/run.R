@@ -6,7 +6,7 @@ runOptsFile <- function(optsFilePath, ignoreSlurm = FALSE) {
     return(invisible())
   }
   executeCodeViaSlurm(
-    cmdStr = rlang::expr_text(rlang::expr(runOpts(!!optsFilePath))),
+    cmdStr = rlang::expr_text(rlang::expr(runOptsFile(!!optsFilePath, TRUE))),
     prefix = opts$slurm$prefix,
     qos = opts$slurm$qos,
     cpusPerTask = opts$slurm$cpusPerTask,

@@ -13,6 +13,7 @@ executeCodeViaSlurm <- function(
     cat("Starting SLURM job", jobName, "\n")
     escapedCmdStr <- gsub("\"", "\\\\\"", cmdStr)
     escapedCmdStr <- gsub("'", "\\\\\'", escapedCmdStr)
+    if (!dir.exists(logDir)) dir.create(logDir)
     clcom <- paste0(
       "sbatch ",
       " --qos=", qos,
