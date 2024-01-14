@@ -13,8 +13,8 @@ interact <- function() {
   cat("Welcome to the R package EbmNetCdf!\n")
   choice <- getUserInput(
     "Choose what to do:",
-    c("run" = "directly run a command with opts file",
-      "slurm" = "use slurm to run a command with opts file",
+    c("slurm" = "use slurm to run a command with opts file",
+      "run" = "directly run a command with opts file",
       "template" = "create a template opts file",
       "exit" = "exit the program"))
   switch(

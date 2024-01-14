@@ -15,6 +15,7 @@ runOptsFile <- function(optsFilePath, ignoreSlurm = FALSE) {
     logDir = opts$slurm$logDir)
 }
 
+
 #' @export
 runOpts <- function(opts) {
 
