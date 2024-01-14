@@ -1,7 +1,7 @@
 {
   "_class": ["Slurm", "Opts"],
   "prefix": "EbmNetCdf",
-  "qos": "",
+  "qos": "short",
   "cpusPerTask": 1,
   "timeInMinutes": 1440,
   "mail": true,

@@ -11,7 +11,7 @@ getUserInputYesNo <- function(title, default) {
 }
 
 getUserInput <- function(title, options, multi = FALSE, default = NULL, onlyNrs = FALSE) {
-  cat("\n", title, "\n", sep="")
+  cat(title, "\n", sep="")
 
   possibleChoices <- NULL
   possibleChoicesNr <- NULL
