@@ -1,0 +1,6 @@
+{
+  "_class": ["OneFilePerRegion", "ShapeToMask", "Run", "Opts"],
+  "shapeFileDir": "path/to/dir",
+  "shapeFilePattern": "/country\\.geojson$",
+  "outFilePath": "out.nc"
+}

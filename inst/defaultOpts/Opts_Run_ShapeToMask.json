@@ -1,0 +1,5 @@
+{
+  "_class": ["ShapeToMask", "Run", "Opts"],
+  "nLon": 360,
+  "nLat": 180
+}

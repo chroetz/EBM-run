@@ -35,3 +35,24 @@ uniqueMiddle <- function(x) {
   suffix <- longestCommonSuffix(x)
   return(gsub(paste0("^", prefix, "|", suffix, "$"), "", x))
 }
+
+
+printPackagesInfo <- function() {
+  selection <- c("Package", "Version", "GithubSHA1")
+  info <- lapply(search(), \(x) {
+    tryCatch(suppressWarnings({
+      nm <- methods::getPackageName(x)
+      unlist(utils::packageDescription(nm)[selection])[seq_along(selection)]
+    }),
+    error = function(cond) NULL)
+  })
+  info <-
+    info[sapply(info, is.character)] |>
+    unlist() |>
+    matrix(ncol=length(selection), byrow=TRUE)
+  colnames(info) <- selection
+  cat("Packages:\n")
+  info |> tibble::as_tibble() |> format(n=Inf) |> paste0(collapse="\n") |> cat()
+  cat("\n")
+  return(invisible(NULL))
+}

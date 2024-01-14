@@ -1,23 +1,32 @@
 #' @export
 run <- function(optsFilePath) {
 
-  opts <- jsonlite::read_json(optsFilePath)
+  opts <- ConfigOpts::readOpts(optsFilePath, optsClass = "Run")
+
+  cat("Run started at ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n", sep="")
+  printPackagesInfo()
+  cat("Run Opts:\n", format(opts), "\n\n", sep="")
+
+  subclass <- ConfigOpts::getClassAt(opts, 2)
 
   pt <- proc.time()
-  cat("START Run", opts$method, "\n\n")
+  cat("START Run", subclass, "\n\n")
   switch(
-    opts$method,
+    subclass,
     ShapeToMask = runMethodShapeToMask(opts),
     BoundingBoxes = runMethodBoundingBoxes(opts),
     SumMask = runMethodSumMask(opts),
     SumAggregation = runMethodSumAggregation(opts),
-    stop("Unknown method: ", opts$method)
+    stop("Unknown method: ", subclass)
   )
-  cat("\nEND Run", opts$method, "after", (proc.time()-pt)[3], "s\n")
+  cat("\nEND Run", subclass, "after", (proc.time()-pt)[3], "s\n")
+  cat("Run ended at ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n", sep="")
 }
 
 
 runMethodBoundingBoxes <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("BoundingBoxes", "Run"))
 
   maskFilePath <- opts$maskFilePath
 
@@ -35,11 +44,12 @@ runMethodBoundingBoxes <- function(opts) {
     maskFilePath,
     regionVariableName = "regionName")
   cat("done.\n")
-  cat("\n")
 }
 
 
 runMethodSumMask <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("SumMask", "Run"))
 
   setupMaskSummation(
     maskFilePath = opts$maskFilePath,
@@ -47,11 +57,12 @@ runMethodSumMask <- function(opts) {
   )
 
   runMaskSummation()
-
 }
 
 
 runMethodSumAggregation <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("SumAggregation", "Run"))
 
   setupSumAggregation(
     targetFormat = opts$targetFormat,
@@ -68,32 +79,50 @@ runMethodSumAggregation <- function(opts) {
 
 runMethodShapeToMask <- function(opts) {
 
-  if (opts$oneFilePerRegion) {
+  opts <- ConfigOpts::asOpts(opts, c("ShapeToMask", "Run"))
 
-    filePaths <- list.files(opts$shapeFileDir, full.names = TRUE, recursive=TRUE)
-    shapeFilePaths <- stringr::str_subset(filePaths, opts$shapeFilePattern)
-    names(shapeFilePaths) <- uniqueMiddle(shapeFilePaths)
+  subclass <- ConfigOpts::getClassAt(opts, 3)
 
-    cat("Found", length(shapeFilePaths), "shape files.\n")
+  switch(
+    subclass,
+    OneFilePerRegion = runMethodShapeToMaskOneFilePerRegion(opts),
+    OneFileForAllRegions = runMethodShapeToMaskOneFileForAllRegions(opts),
+    stop("Unknown subclass: ", subclass)
+  )
+}
 
-    runShapeToMaskOneFilePerRegion(
-      shapeFilePaths = shapeFilePaths,
-      nLon = opts$nLon,
-      nLat = opts$nLat,
-      outFilePath = opts$outFilePath
-    )
 
-  } else {
+runMethodShapeToMaskOneFilePerRegion <- function(opts) {
 
-    runShapeToMaskOneFileForAllRegions(
-      shapeFilePath = opts$shapeFilePath,
-      nLon = opts$nLon,
-      nLat = opts$nLat,
-      outFilePrefix = opts$outFilePrefix,
-      metaOutFilePath = opts$metaOutFilePath,
-      idColumnName = opts$idColumnName,
-      batchSize = opts$batchSize,
-      batchIndexFilter = opts$batchIndexFilter
-    )
-  }
+  opts <- ConfigOpts::asOpts(opts, c("OneFilePerRegion", "ShapeToMask", "Run"))
+
+  filePaths <- list.files(opts$shapeFileDir, full.names = TRUE, recursive=TRUE)
+  shapeFilePaths <- stringr::str_subset(filePaths, opts$shapeFilePattern)
+  names(shapeFilePaths) <- uniqueMiddle(shapeFilePaths)
+
+  cat("Found", length(shapeFilePaths), "shape files.\n")
+
+  runShapeToMaskOneFilePerRegion(
+    shapeFilePaths = shapeFilePaths,
+    nLon = opts$nLon,
+    nLat = opts$nLat,
+    outFilePath = opts$outFilePath
+  )
+}
+
+
+runMethodShapeToMaskOneFileForAllRegions <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("OneFileForAllRegions", "ShapeToMask", "Run"))
+
+  runShapeToMaskOneFileForAllRegions(
+    shapeFilePath = opts$shapeFilePath,
+    nLon = opts$nLon,
+    nLat = opts$nLat,
+    outFilePrefix = opts$outFilePrefix,
+    metaOutFilePath = opts$metaOutFilePath,
+    idColumnName = opts$idColumnName,
+    batchSize = opts$batchSize,
+    batchIndexFilter = opts$batchIndexFilter
+  )
 }
