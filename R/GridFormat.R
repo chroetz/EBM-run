@@ -92,7 +92,7 @@ getNativeGridFormat <- function(filePath, variableName = NULL) {
   stopifnot(c("lon", "lat") %in% dimNames)
   lonValues <- var.get.nc(nc, "lon")
   latValues <- var.get.nc(nc, "lat")
-  if (is.null(variableName)) {
+  if (!hasValue(variableName)) {
     variableName <- ncGetNonDimVariableNames(nc) |> first()
   }
   varInfo <- var.inq.nc(nc, variableName)

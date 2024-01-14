@@ -28,11 +28,11 @@ setupSumAggregation <- function(
 runSumAggregation <- function(yearsFilter = NULL, regionIndices = NULL) {
 
   years <- getDataYears("variable")
-  if (!is.null(yearsFilter)) years <- intersect(years, yearsFilter)
+  if (hasValue(yearsFilter)) years <- intersect(years, yearsFilter)
   cat(length(years), "years to process.\n")
 
   regionNames <- .info$maskList$regionNames
-  if (!is.null(regionIndices)) regionNames <- regionNames[regionIndices]
+  if (hasValue(regionIndices)) regionNames <- regionNames[regionIndices]
   cat(length(regionNames), "regions to process.\n")
 
   cat("Start main loop.\n")

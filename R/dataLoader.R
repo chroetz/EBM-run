@@ -18,7 +18,7 @@ loadDataYearlyFiles <- function(name, dataDescriptor, targetVariable = NULL) {
 
   nc <- open.nc(filePaths[1])
   variableName <- ncGetNonDimVariableNames(nc)
-  if (!is.null(targetVariable)) {
+  if (hasValue(targetVariable)) {
     variableName <- intersect(variableName, targetVariable)
   }
   stopifnot(length(variableName) == 1)
@@ -83,7 +83,7 @@ loadDataSingleFile <- function(name, dataDescriptor, targetVariable = NULL) {
   }
 
   variableName <- ncGetNonDimVariableNames(nc)
-  if (!is.null(targetVariable)) {
+  if (hasValue(targetVariable)) {
     variableName <- intersect(variableName, targetVariable)
   }
   stopifnot(length(variableName) == 1)

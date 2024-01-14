@@ -12,11 +12,15 @@ RoxygenNote: 7.2.3
 Imports: 
     DescTools,
     dplyr,
+    exactextractr,
     jsonlite,
     lubridate,
+    raster,
     readr,
     rlang,
     RNetCDF,
+    sf,
+    stringi,
     stringr,
     tibble
 Suggests: 

@@ -154,7 +154,7 @@ openAndCheckMaskFile <- function(filePath) {
 
 
 getMaskValues <- function(regionName, maskList, boundingBoxes = NULL) {
-  if (!is.null(boundingBoxes)) {
+  if (hasValue(boundingBoxes)) {
     bbInfo <- getSingleBoundingBox(boundingBoxes, regionName)
     values <- var.get.nc(
       maskList$nc,

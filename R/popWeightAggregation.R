@@ -29,7 +29,7 @@ setupPopWeightAggregation <- function(
   readBoundingBoxes(boundingBoxFilePath)
   readMaskSum(maskSumFilePath)
 
-  if (!is.null(popDataDescriptor)) {
+  if (hasValue(popDataDescriptor)) {
     loadData("population", popDataDescriptor)
     .info$weightByPop <- TRUE
   } else {
@@ -65,11 +65,11 @@ runPopWeightAggregation <- function(
 ) {
 
   years <- getYearsPop()
-  if (!is.null(yearsFilter)) years <- intersect(years, yearsFilter)
+  if (hasValue(yearsFilter)) years <- intersect(years, yearsFilter)
   cat(length(years), "years to process.\n")
 
   regionNames <- .info$maskList$regionNames
-  if (!is.null(regionIndices)) regionNames <- regionNames[regionIndices]
+  if (hasValue(regionIndices)) regionNames <- regionNames[regionIndices]
   cat(length(regionNames), "regions to process.\n")
 
   cat("Initializing output files...\n")
@@ -87,7 +87,7 @@ runPopWeightAggregation <- function(
       popValuesAll <- getData("population", year, setNaToZero = TRUE)
     }
     invarNames <- getInvarNames(year)
-    if (!is.null(invarNamesIdxFilter)) {
+    if (hasValue(invarNamesIdxFilter)) {
       invarNames <- invarNames[invarNamesIdxFilter]
       invarNames <- invarNames[!is.na(invarNames)]
     }

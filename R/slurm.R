@@ -54,7 +54,7 @@ callScriptSlurm <- function(
       " --job-name=", jobName,
       " --output=", file.path(logDir, paste0(jobName, "_%j.out")),
       " --error=", file.path(logDir, paste0(jobName, "_%j.err")),
-      if (!is.null(timeInMinutes)) paste0(" --time ", timeInMinutes),
+      if (hasValue(timeInMinutes)) paste0(" --time ", timeInMinutes),
       if (mail) " --mail-type=END",
       " --wrap=\"Rscript '", scriptFilePath, "' ",
       gsub("\"", "\\\\\"", paste(args, collapse=" ")), "\"")
