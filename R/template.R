@@ -1,5 +1,6 @@
 #' @export
-templateRunOpts <- function(optsClass, outFilePath = NULL) {
+templateRunOpts <- function(runOptsClass, outFilePath = NULL) {
+  optsClass <- c(runOptsClass, "Run")
   opts <- ConfigOpts::getDefaultOpts(optsClass, removeUnderscoreEntries = FALSE)
   if (hasValue(outFilePath)) {
     ConfigOpts::writeOpts(opts, outFilePath, addMetaInfo = FALSE)

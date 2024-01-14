@@ -38,5 +38,5 @@ uniqueMiddle <- function(x) {
 
 
 printPackagesInfo <- function() {
-  sessioninfo::session_info()
+  sessioninfo::session_info() |> print()
 }
