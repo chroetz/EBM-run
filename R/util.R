@@ -39,10 +39,9 @@ uniqueMiddle <- function(x) {
 
 printPackagesInfo <- function() {
   selection <- c("Package", "Version", "GithubSHA1")
-  info <- lapply(search(), \(x) {
+  info <- lapply(loadedNamespaces() |> sort(), \(x) {
     tryCatch(suppressWarnings({
-      nm <- methods::getPackageName(x)
-      unlist(utils::packageDescription(nm)[selection])[seq_along(selection)]
+      unlist(utils::packageDescription(x)[selection])[seq_along(selection)]
     }),
     error = function(cond) NULL)
   })
