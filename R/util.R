@@ -38,20 +38,5 @@ uniqueMiddle <- function(x) {
 
 
 printPackagesInfo <- function() {
-  selection <- c("Package", "Version", "GithubSHA1")
-  info <- lapply(loadedNamespaces() |> sort(), \(x) {
-    tryCatch(suppressWarnings({
-      unlist(utils::packageDescription(x)[selection])[seq_along(selection)]
-    }),
-    error = function(cond) NULL)
-  })
-  info <-
-    info[sapply(info, is.character)] |>
-    unlist() |>
-    matrix(ncol=length(selection), byrow=TRUE)
-  colnames(info) <- selection
-  cat("Packages:\n")
-  info |> tibble::as_tibble() |> format(n=Inf) |> paste0(collapse="\n") |> cat()
-  cat("\n")
-  return(invisible(NULL))
+  sessioninfo::session_info()
 }
