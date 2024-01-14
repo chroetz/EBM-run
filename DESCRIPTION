@@ -11,6 +11,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Imports: 
     ConfigOpts,
+    crayon,
     DescTools,
     dplyr,
     exactextractr,
@@ -23,7 +24,8 @@ Imports:
     sf,
     stringi,
     stringr,
-    tibble
+    tibble,
+    withr
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
