@@ -1,7 +1,24 @@
 #' @export
-run <- function(optsFilePath) {
-
+runOptsFile <- function(optsFilePath, ignoreSlurm = FALSE) {
   opts <- ConfigOpts::readOpts(optsFilePath, optsClass = "Run")
+  if (ignoreSlurm) {
+    runOpts(opts)
+    return(invisible())
+  }
+  executeCodeViaSlurm(
+    cmdStr = rlang::expr_text(rlang::expr(runOpts(!!optsFilePath))),
+    prefix = opts$slurm$prefix,
+    qos = opts$slurm$qos,
+    cpusPerTask = opts$slurm$cpusPerTask,
+    timeInMinutes = opts$slurm$timeInMinutes,
+    mail = opts$slurm$mail,
+    logDir = opts$slurm$logDir)
+}
+
+#' @export
+runOpts <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("Run"))
 
   cat("Run started at ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n", sep="")
   printPackagesInfo()

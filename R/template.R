@@ -1,7 +1,10 @@
 #' @export
 templateRunOpts <- function(runOptsClass, outFilePath = NULL) {
   optsClass <- c(runOptsClass, "Run")
-  opts <- ConfigOpts::getDefaultOpts(optsClass, removeUnderscoreEntries = FALSE)
+  opts <- ConfigOpts::getDefaultOpts(
+    optsClass,
+    removeUnderscoreEntries = FALSE,
+    fill = TRUE)
   if (hasValue(outFilePath)) {
     ConfigOpts::writeOpts(opts, outFilePath, addMetaInfo = FALSE)
   } else {
@@ -12,14 +15,16 @@ templateRunOpts <- function(runOptsClass, outFilePath = NULL) {
 
 
 #' @export
-availableRunClasses <- function() {
+printAvailableRunClasses <- function() {
   cat("Available run classes:\n")
-  lapply(
-    ConfigOpts::getAvailableOptsClasses(),
-    \(x) {
-      if (!last(x) == "Run") return(NULL)
-      dput(x)
-    }
-  )
+  runClasses <- getAvailableRunClasses()
+  lapply(runClasses, dput)
   return(invisible())
+}
+
+
+getAvailableRunClasses <- function() {
+  runClasses <- ConfigOpts::getAvailableOptsClasses()
+  runClasses <- runClasses[sapply(runClasses, \(x) last(x) == "Run")]
+  return(runClasses)
 }

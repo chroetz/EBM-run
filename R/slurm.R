@@ -1,16 +1,29 @@
 #' @export
-startComp <- function(cmdStr, prefix="EbmNetCdf") {
+executeCodeViaSlurm <- function(
+    cmdStr,
+    prefix = "EbmNetCdf",
+    qos = c("standby", "priority", "io", "short", "medium", "long", "gpushort", "gpumedium", "gpulong", "gpupreempt"),
+    cpusPerTask = 1,
+    timeInMinutes = NULL,
+    mail = TRUE,
+    logDir = "_log"
+) {
   if (isSlurmAvailable()) {
     jobName <- paste0(prefix, "_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"))
     cat("Starting SLURM job", jobName, "\n")
+    escapedCmdStr <- gsub("\"", "\\\\\"", cmdStr)
+    escapedCmdStr <- gsub("'", "\\\\\'", escapedCmdStr)
     clcom <- paste0(
       "sbatch ",
-      " --qos=short",
+      " --qos=", qos,
+      " --nodes=1 --ntasks=1",
+      " --cpus-per-task=", cpusPerTask,
       " --job-name=", jobName,
-      " --output=", jobName, "_%j.out",
-      " --error=", jobName, "_%j.err",
-      " --mail-type=END",
-      " --wrap=\"Rscript -e '", gsub("\"", "\\\\\"", cmdStr), "'\"")
+      " --output=", file.path(logDir, paste0(jobName, "_%j.out")),
+      " --error=", file.path(logDir, paste0(jobName, "_%j.err")),
+      if (hasValue(timeInMinutes)) paste0(" --time ", timeInMinutes),
+      if (mail) " --mail-type=END",
+      " --wrap=\"Rscript -e '", escapedCmdStr, "'\"")
     cat(clcom, "\n")
     system(clcom)
   } else {
@@ -18,25 +31,24 @@ startComp <- function(cmdStr, prefix="EbmNetCdf") {
   }
 }
 
+
 isSlurmAvailable <- function() {
   return(suppressWarnings(system2("srun", stdout = FALSE, stderr = FALSE) != 127))
 }
 
 
 #' @export
-callScriptSlurm <- function(
+executeScriptViaSlurm <- function(
     scriptFilePath,
     argList,
     prefix = "EbmNetCdf",
     qos = c("standby", "priority", "io", "short", "medium", "long", "gpushort", "gpumedium", "gpulong", "gpupreempt"),
-    #partition = c("priority", "io", "gpu", "largemem", "standard"), # Need to match qos to partitions...
     cpusPerTask = 1,
     timeInMinutes = NULL,
     mail = TRUE,
     logDir = "_log"
 ) {
   qos <- match.arg(qos)
-  #partition <- match.arg(partition)
   stopifnot(isSlurmAvailable())
   if (!dir.exists(logDir)) dir.create(logDir)
   for (args in argList) {
@@ -48,7 +60,6 @@ callScriptSlurm <- function(
     clcom <- paste0(
       "sbatch ",
       " --qos=", qos,
-      #" --partition=", partition,
       " --nodes=1 --ntasks=1",
       " --cpus-per-task=", cpusPerTask,
       " --job-name=", jobName,
@@ -56,8 +67,8 @@ callScriptSlurm <- function(
       " --error=", file.path(logDir, paste0(jobName, "_%j.err")),
       if (hasValue(timeInMinutes)) paste0(" --time ", timeInMinutes),
       if (mail) " --mail-type=END",
-      " --wrap=\"Rscript '", scriptFilePath, "' ",
-      gsub("\"", "\\\\\"", paste(args, collapse=" ")), "\"")
+      " --wrap=\"Rscript '", scriptFilePath, "'",
+      " ", gsub("\"", "\\\\\"", paste(args, collapse=" ")), "\"")
     cat(clcom, "\n")
     system(clcom)
   }

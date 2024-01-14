@@ -1,0 +1,9 @@
+{
+  "_class": ["Slurm", "Opts"],
+  "prefix": "EbmNetCdf",
+  "qos": "",
+  "cpusPerTask": 1,
+  "timeInMinutes": 1440,
+  "mail": true,
+  "logDir": "./_log"
+}

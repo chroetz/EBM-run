@@ -1,3 +1,6 @@
 {
-  "_class": ["Run", "Opts"]
+  "_class": ["Run", "Opts"],
+  "slurm": {
+    "_class": ["Slurm", "Opts"]
+  }
 }
