@@ -6,7 +6,7 @@ runOptsFile <- function(optsFilePath, ignoreSlurm = FALSE, jobIdx = NULL) {
     return(invisible())
   }
   for (jobIdx in seq_len(opts$slurm$nJobs)) {
-    cmdExpression <- rlang::expr(run::runOptsFile(!!optsFilePath, TRUE, jobIdx))
+    cmdExpression <- rlang::expr(run::runOptsFile(!!optsFilePath, TRUE, !!jobIdx))
     executeCodeViaSlurm(
       cmdStr = rlang::expr_text(cmdExpression, width = 500),
       prefix = opts$slurm$prefix,
