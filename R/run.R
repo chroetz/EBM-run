@@ -5,8 +5,9 @@ runOptsFile <- function(optsFilePath, ignoreSlurm = FALSE) {
     runOpts(opts)
     return(invisible())
   }
+  cmdExpression <- rlang::expr(run::runOptsFile(!!optsFilePath, TRUE))
   executeCodeViaSlurm(
-    cmdStr = rlang::expr_text(rlang::expr(run::runOptsFile(!!optsFilePath, TRUE))),
+    cmdStr = rlang::expr_text(cmdExpression, width = 500),
     prefix = opts$slurm$prefix,
     qos = opts$slurm$qos,
     cpusPerTask = opts$slurm$cpusPerTask,
@@ -53,10 +54,10 @@ runMethodBoundingBoxes <- function(opts) {
     "_boundingBox.nc")
 
   pt <- proc.time()
-  boundingBoxes <- getBoundingBoxesFromMask(maskFilePath)
+  boundingBoxes <- ProcessNetCdf::getBoundingBoxesFromMask(maskFilePath)
   cat("obtained", ncol(boundingBoxes), "bounding boxes in ", (proc.time()-pt)[3],"s\n")
   cat("saving bounding boxes to file ", outFilePath, "... ")
-  saveBoundingBoxes(
+  ProcessNetCdf::saveBoundingBoxes(
     boundingBoxes,
     outFilePath,
     maskFilePath,
@@ -69,12 +70,12 @@ runMethodSumMask <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("SumMask", "Run"))
 
-  setupMaskSummation(
+  ProcessNetCdf::setupMaskSummation(
     maskFilePath = opts$maskFilePath,
     outFilePath = opts$outFilePath
   )
 
-  runMaskSummation()
+  ProcessNetCdf::runMaskSummation()
 }
 
 
@@ -82,7 +83,7 @@ runMethodSumAggregation <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("SumAggregation", "Run"))
 
-  setupSumAggregation(
+  ProcessNetCdf::setupSumAggregation(
     targetFormat = opts$targetFormat,
     maskFilePath = opts$maskFilePath,
     maskSumFilePath = opts$maskSumFilePath,
@@ -91,7 +92,7 @@ runMethodSumAggregation <- function(opts) {
     outFilePath = opts$outFilePath
   )
 
-  runSumAggregation(opts$yearsFilter, opts$regionIndices)
+  ProcessNetCdf::runSumAggregation(opts$yearsFilter, opts$regionIndices)
 }
 
 
@@ -120,7 +121,7 @@ runMethodShapeToMaskOneFilePerRegion <- function(opts) {
 
   cat("Found", length(shapeFilePaths), "shape files.\n")
 
-  runShapeToMaskOneFilePerRegion(
+  ProcessNetCdf::runShapeToMaskOneFilePerRegion(
     shapeFilePaths = shapeFilePaths,
     nLon = opts$nLon,
     nLat = opts$nLat,
@@ -133,7 +134,7 @@ runMethodShapeToMaskOneFileForAllRegions <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("OneFileForAllRegions", "ShapeToMask", "Run"))
 
-  runShapeToMaskOneFileForAllRegions(
+  ProcessNetCdf::runShapeToMaskOneFileForAllRegions(
     shapeFilePath = opts$shapeFilePath,
     nLon = opts$nLon,
     nLat = opts$nLat,

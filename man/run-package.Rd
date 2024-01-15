@@ -4,9 +4,9 @@
 \name{run-package}
 \alias{run}
 \alias{run-package}
-\title{run: Deal with NetCDF files (formerly EbmNetCdf)}
+\title{run: Interactively Run Commands with Slurm}
 \description{
-Deal with NetCDF files.
+Interactively Run Commands with Slurm.
 }
 \author{
 \strong{Maintainer}: Christof Schötz \email{math@christof-schoetz.de} (\href{https://orcid.org/0000-0003-3528-4544}{ORCID})

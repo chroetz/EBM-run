@@ -1,10 +1,10 @@
 Package: run
-Title: Deal with NetCDF files (formerly EbmNetCdf)
+Title: Interactively Run Commands with Slurm
 Version: 0.0.0.9000
 Authors@R: 
     person("Christof", "Schötz", , "math@christof-schoetz.de", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-3528-4544"))
-Description: Deal with NetCDF files.
+Description: Interactively Run Commands with Slurm.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -13,14 +13,10 @@ Imports:
     ConfigOpts,
     crayon,
     dplyr,
-    exactextractr,
-    lubridate,
-    raster,
-    readr,
+    ProcessNetCdf,
     rlang,
     RNetCDF,
     sessioninfo,
-    sf,
     stringi,
     stringr,
     tibble,
