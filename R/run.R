@@ -140,12 +140,18 @@ runMethodShapeToMaskOneFileForAllRegions <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("OneFileForAllRegions", "ShapeToMask", "Run"))
 
+  if (jobIdx > 1) {
+    metaOutFilePath <- NULL
+  } else {
+    metaOutFilePath <- opts$metaOutFilePath
+  }
+
   ProcessNetCdf::runShapeToMaskOneFileForAllRegions(
     shapeFilePath = opts$shapeFilePath,
     nLon = opts$nLon,
     nLat = opts$nLat,
     outFilePrefix = opts$outFilePrefix,
-    metaOutFilePath = opts$metaOutFilePath,
+    metaOutFilePath = metaOutFilePath,
     idColumnName = opts$idColumnName,
     nBatches = opts$slurm$nJobs,
     batchIndexFilter = opts$slurm$jobIdx
