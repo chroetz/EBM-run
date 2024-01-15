@@ -3,6 +3,6 @@
   "shapeFilePath": "path/to/shapefiles.gpkg",
   "outFilePrefix": "maskOutPrefix",
   "metaOutFilePath": "meta.csv",
-  "idColumnName": null,
-  "batchSize": 100
+  "idColumnName": "",
+  "_idColumnName_description": "VariableName or empty string for guessing"
 }
