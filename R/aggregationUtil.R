@@ -125,8 +125,22 @@ getInvarNames <- function(year) {
 }
 
 
-reverseArrayDim <- function(x, i) {
-  DescTools::Rev(x, i)
+reverseArrayDim <- function(x, dims) {
+  if (is.character(dims)) {
+    dims <- vapply(dims, \(nm) which(nm == names(dimnames(x)))[[1]], integer(1))
+  }
+  dims <- as.integer(dims)
+  n <- length(dim(x))
+  stopifnot(all(dims > 0 & dims <= n))
+  dimIndices <- rep(list(quote(expr=)), n)
+  for (i in dims) {
+    dimLen <- dim(x)[i]
+    if (dimLen == 0) next
+    dimIndices[[i]] <- dimLen:1
+  }
+  z <- do.call(`[`, c(list(x), dimIndices))
+  oldClass(z) <- oldClass(x)
+  return(z)
 }
 
 
