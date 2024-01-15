@@ -24,7 +24,7 @@ runOpts <- function(opts, jobIdx=NULL) {
 
   opts <- ConfigOpts::asOpts(opts, c("Run"))
   if (hasValue(jobIdx)) {
-    ConfigOpts::overwriteOpts(opts, opts$slurm$jobIdx = jobIdx)
+    opts <- ConfigOpts::overwriteOpts(opts, list(slurm = list(jobIdx = jobIdx)))
   }
 
   cat("Run started at ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n", sep="")
