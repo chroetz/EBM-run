@@ -140,7 +140,7 @@ runMethodShapeToMaskOneFileForAllRegions <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("OneFileForAllRegions", "ShapeToMask", "Run"))
 
-  if (jobIdx > 1) {
+  if (opts$slurm$jobIdx > 1) {
     metaOutFilePath <- NULL
   } else {
     metaOutFilePath <- opts$metaOutFilePath
