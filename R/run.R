@@ -1,26 +1,31 @@
 #' @export
-runOptsFile <- function(optsFilePath, ignoreSlurm = FALSE) {
+runOptsFile <- function(optsFilePath, ignoreSlurm = FALSE, jobIdx = NULL) {
   opts <- ConfigOpts::readOpts(optsFilePath, optsClass = "Run")
   if (ignoreSlurm) {
-    runOpts(opts)
+    runOpts(opts, jobIdx)
     return(invisible())
   }
-  cmdExpression <- rlang::expr(run::runOptsFile(!!optsFilePath, TRUE))
-  executeCodeViaSlurm(
-    cmdStr = rlang::expr_text(cmdExpression, width = 500),
-    prefix = opts$slurm$prefix,
-    qos = opts$slurm$qos,
-    cpusPerTask = opts$slurm$cpusPerTask,
-    timeInMinutes = opts$slurm$timeInMinutes,
-    mail = opts$slurm$mail,
-    logDir = opts$slurm$logDir)
+  for (jobIdx in seq_len(opts$slurm$nJobs)) {
+    cmdExpression <- rlang::expr(run::runOptsFile(!!optsFilePath, TRUE, jobIdx))
+    executeCodeViaSlurm(
+      cmdStr = rlang::expr_text(cmdExpression, width = 500),
+      prefix = opts$slurm$prefix,
+      qos = opts$slurm$qos,
+      cpusPerTask = opts$slurm$cpusPerTask,
+      timeInMinutes = opts$slurm$timeInMinutes,
+      mail = opts$slurm$mail,
+      logDir = opts$slurm$logDir)
+  }
 }
 
 
 #' @export
-runOpts <- function(opts) {
+runOpts <- function(opts, jobIdx=NULL) {
 
   opts <- ConfigOpts::asOpts(opts, c("Run"))
+  if (hasValue(jobIdx)) {
+    ConfigOpts::overwriteOpts(opts, opts$slurm$jobIdx = jobIdx)
+  }
 
   cat("Run started at ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n", sep="")
   loadNamespace("ProcessNetCdf") # to make sure its info is printed
@@ -142,7 +147,7 @@ runMethodShapeToMaskOneFileForAllRegions <- function(opts) {
     outFilePrefix = opts$outFilePrefix,
     metaOutFilePath = opts$metaOutFilePath,
     idColumnName = opts$idColumnName,
-    batchSize = opts$batchSize,
-    batchIndexFilter = opts$batchIndexFilter
+    nBatches = opts$slurm$nJobs,
+    batchIndexFilter = opts$slurm$jobIdx
   )
 }

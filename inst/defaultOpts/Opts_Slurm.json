@@ -5,5 +5,7 @@
   "cpusPerTask": 1,
   "timeInMinutes": 1440,
   "mail": true,
-  "logDir": "./_log"
+  "logDir": "./_log",
+  "nJobs": 1,
+  "jobIdx": 1
 }
