@@ -5,13 +5,13 @@ runOptsFile <- function(optsFilePath, ignoreSlurm = FALSE, jobIdx = NULL) {
     runOpts(opts, jobIdx)
     return(invisible())
   }
-  prefix <- paste0(
-    opts$slurm$prefix,
-    "_",
-    removeFileNameEnding(basename(optsFilePath)),
-    "_",
-    jobIdx)
   for (jobIdx in seq_len(opts$slurm$nJobs)) {
+    prefix <- paste0(
+      opts$slurm$prefix,
+      "_",
+      removeFileNameEnding(basename(optsFilePath)),
+      "_",
+      jobIdx)
     cmdExpression <- rlang::expr(run::runOptsFile(!!optsFilePath, TRUE, !!jobIdx))
     executeCodeViaSlurm(
       cmdStr = rlang::expr_text(cmdExpression, width = 500),
