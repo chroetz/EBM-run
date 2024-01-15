@@ -1,6 +1,6 @@
 {
   "_class": ["Slurm", "Opts"],
-  "prefix": "EbmNetCdf",
+  "prefix": "run",
   "qos": "short",
   "cpusPerTask": 1,
   "timeInMinutes": 1440,

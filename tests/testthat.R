@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/reference/test_package.html#special-files
 
 library(testthat)
-library(EbmNetCdf)
+library(run)
 
-test_check("EbmNetCdf")
+test_check("run")

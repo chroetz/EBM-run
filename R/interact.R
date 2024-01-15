@@ -10,7 +10,7 @@ print.InteractionStarter <- function(x, ...) {
 
 #' @export
 interact <- function() {
-  cat("Welcome to the R package EbmNetCdf!\n")
+  cat("Welcome to the R package run!\n")
   choice <- getUserInput(
     "Choose what to do:",
     c("slurm" = "use slurm to run a command with opts file",

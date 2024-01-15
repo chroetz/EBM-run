@@ -1,5 +1,5 @@
-Package: EbmNetCdf
-Title: Deal with NetCDF files
+Package: run
+Title: Deal with NetCDF files (formerly EbmNetCdf)
 Version: 0.0.0.9000
 Authors@R: 
     person("Christof", "Schötz", , "math@christof-schoetz.de", role = c("aut", "cre"),
