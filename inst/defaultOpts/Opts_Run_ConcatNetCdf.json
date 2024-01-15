@@ -1,0 +1,6 @@
+{
+  "_class": ["ConcatNetCdf", "Run", "Opts"],
+  "outFilePath": "out/file/path.nc",
+  "inFileDir": "path/to/in/dir",
+  "inFilePattern": "regex for files"
+}
