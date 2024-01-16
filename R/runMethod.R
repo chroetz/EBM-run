@@ -18,7 +18,7 @@ runMethodBoundingBoxes <- function(opts) {
     boundingBoxes,
     outFilePath,
     maskFilePath,
-    regionVariableName = "regionName")
+    regionVariableName = opts$regionVariableName)
   cat("done.\n")
 }
 

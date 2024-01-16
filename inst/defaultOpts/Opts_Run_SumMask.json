@@ -1,3 +1,5 @@
 {
-  "_class": ["SumMask", "Run", "Opts"]
+  "_class": ["SumMask", "Run", "Opts"],
+  "maskFilePath": "path/to/maskFile.nc",
+  "outFilePath": "path/to/out.nc"
 }

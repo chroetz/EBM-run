@@ -1,3 +1,5 @@
 {
-  "_class": ["ShapeToMask", "Run", "Opts"]
+  "_class": ["BoundingBoxes", "Run", "Opts"],
+  "maskFilePath": "path/to/maskFile.nc",
+  "regionVariableName": "regionName"
 }

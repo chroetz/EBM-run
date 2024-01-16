@@ -1,3 +1,11 @@
 {
-  "_class": ["SumAggregation", "Run", "Opts"]
+  "_class": ["SumAggregation", "Run", "Opts"],
+  "targetFormat": "",
+  "maskFilePath": "",
+  "maskSumFilePath": "",
+  "boundingBoxFilePath": "",
+  "variableDataDescriptor": "",
+  "outFilePath": "",
+  "yearsFilter": "",
+  "regionIndices": ""
 }
