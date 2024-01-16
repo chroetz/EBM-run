@@ -1,11 +1,15 @@
 {
   "_class": ["SumAggregation", "Run", "Opts"],
-  "targetFormat": "",
-  "maskFilePath": "",
-  "maskSumFilePath": "",
-  "boundingBoxFilePath": "",
-  "variableDataDescriptor": "",
-  "outFilePath": "",
-  "yearsFilter": "",
-  "regionIndices": ""
+  "targetFormat": {
+      "_class": ["GridFormat", "Opts"]
+  },
+  "maskFilePath": "path/to/mask.nc",
+  "maskSumFilePath": "path/to/maskSum.nc",
+  "boundingBoxFilePath": "path/to/bbox.nc",
+  "variableDataDescriptor": {
+    "_class": ["DataDescriptor", "Opts"]
+  },
+  "outFilePath": "path/to/out.nc",
+  "yearsFilter": [2001,2002],
+  "regionIndices": [1,2]
 }
