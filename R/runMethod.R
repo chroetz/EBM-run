@@ -46,10 +46,15 @@ runMethodSumAggregation <- function(opts) {
     maskSumFilePath = opts$maskSumFilePath,
     boundingBoxFilePath = opts$boundingBoxFilePath,
     variableDataDescriptor = opts$variableDataDescriptor,
-    outFilePath = opts$outFilePath
+    outFilePath = paste0(opts$outFilePrefix, "_", opts$slurm$jobIdx, ".csv")
   )
 
-  ProcessNetCdf::runSumAggregation(opts$yearsFilter, opts$regionIndices)
+  ProcessNetCdf::runSumAggregation(
+    nBatches = opts$slurm$nJobs,
+    batchIndex = opts$slurm$jobIdx,
+    yearsFilter = opts$yearsFilter,
+    regionFilter = opts$regionFilter
+  )
 }
 
 
@@ -101,11 +106,11 @@ runMethodShapeToMaskOneFileForAllRegions <- function(opts) {
     shapeFilePath = opts$shapeFilePath,
     nLon = opts$nLon,
     nLat = opts$nLat,
-    outFilePrefix = opts$outFilePrefix,
+    outFilePath = paste0(opts$outFilePrefix, "_", opts$slurm$jobIdx, ".nc"),
     metaOutFilePath = metaOutFilePath,
     idColumnName = opts$idColumnName,
     nBatches = opts$slurm$nJobs,
-    batchIndexFilter = opts$slurm$jobIdx
+    batchIndex = opts$slurm$jobIdx
   )
 }
 

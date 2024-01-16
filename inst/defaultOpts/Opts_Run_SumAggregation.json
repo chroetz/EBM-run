@@ -9,7 +9,7 @@
   "variableDataDescriptor": {
     "_class": ["DataDescriptor", "Opts"]
   },
-  "outFilePath": "path/to/out.nc",
+  "outFilePrefix": "path/to/out",
   "yearsFilter": [2001,2002],
-  "regionIndices": [1,2]
+  "regionFilter": ["DEU", "FRA"]
 }
