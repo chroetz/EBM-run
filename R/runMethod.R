@@ -128,3 +128,25 @@ runMethodConcatNetCdf <- function(opts) {
 }
 
 
+runMethodCreateMaps <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("CreateMaps", "Run"))
+
+  ExploreData::createMaps(
+    dataFilePath = opts$dataFilePath,
+    dataVariableName = opts$dataVariableName,
+    dataRegionName = opts$dataRegionName,
+    dataTimeName = opts$dataTimeName,
+    variableTransformationText = opts$variableTransformationText,
+    shapeFilePath = opts$shapeFilePath,
+    shapeRegionName = opts$shapeRegionName,
+    outDir = opts$outDir,
+    widthInPx = opts$widthInPx,
+    heightInPx = opts$heightInPx,
+    dpi = opts$dpi,
+    nBatches = opts$slurm$nJobs,
+    batchIndex = opts$slurm$jobIdx,
+    timeFilter = opts$timeFilter,
+    regionFilter = opts$regionFilter
+  )
+}

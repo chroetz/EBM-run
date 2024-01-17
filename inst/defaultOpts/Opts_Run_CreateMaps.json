@@ -1,0 +1,18 @@
+{
+  "_class": ["CreateMaps", "Run", "Opts"],
+  "dataFilePath": "path/to/data.csv",
+  "dataVariableName": "variableToPlot",
+  "dataRegionName": "GID_1",
+  "dataTimeName": "year",
+  "variableTransformationText": null,
+  "shapeFilePath": "path/to/shapefile.gpkg",
+  "shapeRegionName": "GID_1",
+  "outDir": "out/dir",
+  "widthinPx": 1920,
+  "heightinPx": 1080,
+  "dpi": 150,
+  "nBatches": 1,
+  "batchIndex": 1,
+  "timeFilter": null,
+  "regionFilter": null
+}

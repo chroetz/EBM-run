@@ -49,6 +49,7 @@ runOpts <- function(opts, jobIdx=NULL) {
     SumMask = runMethodSumMask(opts),
     SumAggregation = runMethodSumAggregation(opts),
     ConcatNetCdf = runMethodConcatNetCdf(opts),
+    CreateMaps = runMethodCreateMaps(opts),
     stop("Unknown method: ", subclass)
   )
   cat("\nEND Run", subclass, "after", (proc.time()-pt)[3], "s\n")
