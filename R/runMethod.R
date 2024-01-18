@@ -137,7 +137,7 @@ runMethodCreateMaps <- function(opts) {
     dataVariableName = opts$dataVariableName,
     dataRegionName = opts$dataRegionName,
     dataTimeName = opts$dataTimeName,
-    variableTransformationText = opts$variableTransformationText,
+    variableTrans = opts$variableTrans,
     shapeFilePath = opts$shapeFilePath,
     shapeRegionName = opts$shapeRegionName,
     outDir = opts$outDir,

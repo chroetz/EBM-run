@@ -4,7 +4,7 @@
   "dataVariableName": "variableToPlot",
   "dataRegionName": "GID_1",
   "dataTimeName": "year",
-  "variableTransformationText": null,
+  "variableTrans": "identity",
   "shapeFilePath": "path/to/shapefile.gpkg",
   "shapeRegionName": "GID_1",
   "outDir": "out/dir",
