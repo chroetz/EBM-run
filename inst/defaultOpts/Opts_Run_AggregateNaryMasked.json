@@ -1,0 +1,12 @@
+{
+  "_class": ["AggregateNaryMasked", "Run", "Opts"],
+  "maskFilePath": "path/to/mask.nc",
+  "maskSumFilePath": "path/to/maskSum.nc",
+  "boundingBoxFilePath": "path/to/bbox.nc",
+  "variableDataDescriptorList": {
+    "_class": ["DataDescriptor", "List", "Opts"]
+  },
+  "outFilePrefix": "path/to/out",
+  "yearsFilter": null,
+  "regionRegex": null
+}

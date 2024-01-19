@@ -36,24 +36,21 @@ runMethodSumMask <- function(opts) {
 }
 
 
-runMethodSumAggregation <- function(opts) {
+runMethodAggregateNaryMasked <- function(opts) {
 
-  opts <- ConfigOpts::asOpts(opts, c("SumAggregation", "Run"))
+  opts <- ConfigOpts::asOpts(opts, c("AggregateNaryMasked", "Run"))
 
-  ProcessNetCdf::setupSumAggregation(
-    targetFormat = opts$targetFormat,
+  ProcessNetCdf::aggregateNaryMasked(
     maskFilePath = opts$maskFilePath,
     maskSumFilePath = opts$maskSumFilePath,
     boundingBoxFilePath = opts$boundingBoxFilePath,
-    variableDataDescriptor = opts$variableDataDescriptor,
-    outFilePath = paste0(opts$outFilePrefix, "_", opts$slurm$jobIdx, ".csv")
-  )
-
-  ProcessNetCdf::runSumAggregation(
+    variableDataDescriptorList = opts$variableDataDescriptorList,
+    outFilePath = paste0(opts$outFilePrefix, "_", opts$slurm$jobIdx, ".csv"),
+    aggregateExpression = parse(text = opts$aggregateText),
     nBatches = opts$slurm$nJobs,
     batchIndex = opts$slurm$jobIdx,
     yearsFilter = opts$yearsFilter,
-    regionFilter = opts$regionFilter
+    regionRegex = opts$regionRegex
   )
 }
 
