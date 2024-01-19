@@ -6,6 +6,7 @@
   "variableDataDescriptorList": {
     "_class": ["DataDescriptor", "List", "Opts"]
   },
+  "aggregateText": "sum(mask * x)",
   "outFilePrefix": "path/to/out",
   "yearsFilter": null,
   "regionRegex": null
