@@ -1,6 +1,6 @@
 #' @export
 runOptsFile <- function(optsFilePath, ignoreSlurm = FALSE, jobIdx = NULL) {
-  opts <- ConfigOpts::readOpts(optsFilePath, optsClass = "Run")
+  opts <- ConfigOpts::readOpts(optsFilePath)
   if (ignoreSlurm) {
     runOpts(opts, jobIdx)
     return(invisible())
