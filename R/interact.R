@@ -1,14 +1,4 @@
 #' @export
-. <- structure(NA, class = "InteractionStarter")
-
-
-#' @export
-print.InteractionStarter <- function(x, ...) {
-  interact()
-}
-
-
-#' @export
 interact <- function() {
   cat("Welcome to the R package run!\n")
   choice <- getUserInput(
