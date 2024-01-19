@@ -150,3 +150,19 @@ runMethodCreateMaps <- function(opts) {
     regionRegex = opts$regionRegex
   )
 }
+
+
+runMethodImagesToVideo <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("ImagesToVideo", "Run"))
+
+  ExploreData::createVideo(
+    imageDirPath = opts$imageDirPath,
+    outDirPath = opts$outDirPath,
+    frameRate = opts$frameRate,
+    nBatches = opts$slurm$nJobs,
+    batchIndex = opts$slurm$jobIdx
+  )
+}
+
+
