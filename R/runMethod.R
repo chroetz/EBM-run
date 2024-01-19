@@ -40,13 +40,15 @@ runMethodAggregateNaryMasked <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("AggregateNaryMasked", "Run"))
 
+  expr <- rlang::parse_expr(opts$aggregateText)
+
   ProcessNetCdf::aggregateNaryMasked(
     maskFilePath = opts$maskFilePath,
     maskSumFilePath = opts$maskSumFilePath,
     boundingBoxFilePath = opts$boundingBoxFilePath,
     variableDataDescriptorList = opts$variableDataDescriptorList,
     outFilePath = paste0(opts$outFilePrefix, "_", opts$slurm$jobIdx, ".csv"),
-    aggregateExpression = parse(text = opts$aggregateText),
+    aggregateExpression = expr,
     nBatches = opts$slurm$nJobs,
     batchIndex = opts$slurm$jobIdx,
     yearsFilter = opts$yearsFilter,
