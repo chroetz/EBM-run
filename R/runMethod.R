@@ -147,6 +147,6 @@ runMethodCreateMaps <- function(opts) {
     nBatches = opts$slurm$nJobs,
     batchIndex = opts$slurm$jobIdx,
     timeFilter = opts$timeFilter,
-    regionFilter = opts$regionFilter
+    regionRegex = opts$regionRegex
   )
 }
