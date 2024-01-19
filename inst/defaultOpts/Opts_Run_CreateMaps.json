@@ -14,5 +14,5 @@
   "nBatches": 1,
   "batchIndex": 1,
   "timeFilter": null,
-  "regionFilter": null
+  "regionRegex": null
 }
