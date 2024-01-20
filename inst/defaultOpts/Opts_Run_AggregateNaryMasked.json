@@ -7,7 +7,7 @@
     "_class": ["DataDescriptor", "List", "Opts"]
   },
   "aggregateText": "sum(mask * x)",
-  "outFilePrefix": "path/to/out",
+  "outDir": "path/to/dir",
   "yearsFilter": null,
   "regionRegex": null
 }
