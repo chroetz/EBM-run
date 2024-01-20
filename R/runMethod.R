@@ -78,7 +78,7 @@ runMethodShapeToMaskOneFilePerRegion <- function(opts) {
 
   filePaths <- list.files(opts$shapeFileDir, full.names = TRUE, recursive=TRUE)
   shapeFilePaths <- stringr::str_subset(filePaths, opts$shapeFilePattern)
-  names(shapeFilePaths) <- uniqueMiddle(shapeFilePaths)
+  names(shapeFilePaths) <- EbmUtility::uniqueMiddle(shapeFilePaths)
 
   cat("Found", length(shapeFilePaths), "shape files.\n")
 

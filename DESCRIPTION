@@ -13,11 +13,12 @@ Imports:
     ConfigOpts,
     crayon,
     dplyr,
+    EbmUtility,
+    ExploreData,
     ProcessNetCdf,
     rlang,
     RNetCDF,
     sessioninfo,
-    stringi,
     stringr,
     tibble,
     withr
