@@ -3,6 +3,7 @@
   "imageDirPath": "path/to/dir",
   "outDirPath": "path/to/dir",
   "frameRate": 5,
+  "outFormat": "mpeg4",
   "keepInfoTxtFile": false,
   "nBatches": 1,
   "batchIndex": 1

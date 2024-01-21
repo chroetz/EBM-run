@@ -159,6 +159,7 @@ runMethodImagesToVideo <- function(opts) {
     imageDirPath = opts$imageDirPath,
     outDirPath = opts$outDirPath,
     frameRate = opts$frameRate,
+    outFormat = opts$outFormat,
     keepInfoTxtFile = opts$keepInfoTxtFile,
     nBatches = opts$slurm$nJobs,
     batchIndex = opts$slurm$jobIdx
