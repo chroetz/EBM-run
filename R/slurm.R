@@ -14,7 +14,7 @@ executeCodeViaSlurm <- function(
     escapedCmdStr <- gsub("\"", "\\\\\"", cmdStr)
     escapedCmdStr <- gsub("'", "\\\\\'", escapedCmdStr)
     if (!dir.exists(logDir)) dir.create(logDir)
-    clcom <- paste0(
+    command <- paste0(
       "sbatch ",
       " --qos=", qos,
       " --nodes=1 --ntasks=1",
@@ -25,8 +25,9 @@ executeCodeViaSlurm <- function(
       if (hasValue(timeInMinutes)) paste0(" --time ", timeInMinutes),
       if (mail) " --mail-type=END",
       " --wrap=\"Rscript -e '", escapedCmdStr, "'\"")
-    cat(clcom, "\n")
-    system(clcom)
+    cat(command, "\n")
+    x <- system(command, intern = TRUE)
+    cat("The value of x is", x, "\n")
   } else {
     stop("Slurm is not available.")
   }
@@ -58,7 +59,7 @@ executeScriptViaSlurm <- function(
       format(Sys.time(), "%Y-%m-%d_%H-%M-%S"), "_",
       gsub("[^a-zA-Z0-9]", "-", paste(args, collapse="-")))
     cat("Starting SLURM job", jobName, "\n")
-    clcom <- paste0(
+    command <- paste0(
       "sbatch ",
       " --qos=", qos,
       " --nodes=1 --ntasks=1",
@@ -70,8 +71,8 @@ executeScriptViaSlurm <- function(
       if (mail) " --mail-type=END",
       " --wrap=\"Rscript '", scriptFilePath, "'",
       " ", gsub("\"", "\\\\\"", paste(args, collapse=" ")), "\"")
-    cat(clcom, "\n")
-    x <- system(clcom, intern = TRUE)
+    cat(command, "\n")
+    x <- system(command, intern = TRUE)
     cat("The value of x is", x, "\n")
   }
 }
