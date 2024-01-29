@@ -61,23 +61,47 @@ interactRunEnter <- function(ignoreSlurm) {
 }
 
 
-interactRunSearch <- function(ignoreSlurm) {
+interactRunSearch <- function(ignoreSlurm, path = ".") {
   optsFilePaths <- list.files(
+    path = path,
     pattern = ".json$",
-    recursive = TRUE)
-  if (length(optsFilePaths) == 0) {
-    cat("No opts files found. Exiting.\n")
-    interactExit()
-    return(invisible())
-  }
+    recursive = FALSE)
+  dirPaths <- c(
+    "..",
+    list.dirs(
+      path = path,
+      recursive = FALSE,
+      full.names = FALSE)
+  )
+  optsFilePrefix <- "run "
+  dirPrefix <- "goto "
+  choices <- c(
+    if (length(optsFilePaths) > 0)
+      paste0(optsFilePrefix, optsFilePaths)
+    else
+      character(0),
+    if (length(dirPrefix) > 0)
+      paste0(dirPrefix, dirPaths)
+    else
+        character(0))
   choice <- getUserInput(
     paste0(
       "Choose opts file to run",
       if (ignoreSlurm) " (directly)" else " (via slurm)",
       ":"),
-    optsFilePaths)
-  choice <- normalizePath(choice, mustWork = TRUE)
-  runOptsFile(choice, ignoreSlurm)
+    choices)
+  if (startsWith(choice, optsFilePrefix)) {
+    optsFilePath <- normalizePath(
+      file.path(path, substring(choice, nchar(optsFilePrefix)+1)),
+      mustWork = TRUE)
+    runOptsFile(optsFilePath, ignoreSlurm)
+  } else if (startsWith(choice, dirPrefix)) {
+    interactRunSearch(ignoreSlurm, normalizePath(
+      file.path(path, substring(choice, nchar(dirPrefix)+1)),
+      mustWork = TRUE))
+  } else {
+    stop("Unknown choice: ", choice)
+  }
 }
 
 
