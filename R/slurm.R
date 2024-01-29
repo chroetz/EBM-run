@@ -71,6 +71,7 @@ executeScriptViaSlurm <- function(
       " --wrap=\"Rscript '", scriptFilePath, "'",
       " ", gsub("\"", "\\\\\"", paste(args, collapse=" ")), "\"")
     cat(clcom, "\n")
-    system(clcom)
+    x <- system(clcom, intern = TRUE)
+    cat("The value of x is", x, "\n")
   }
 }
