@@ -43,13 +43,13 @@ runOptsFile <- function(optsFilePath, jobIdx = NULL) {
 runDependentJobsSlurm <- function(optsFilePath, jobIds) {
   opts <- ConfigOpts::readOpts(optsFilePath)
   if (hasValueString(opts$optsFilePathsAfterwardsAlways)) {
-    for (optsFilePathAfterwards in opts$optsFilePathsAfterwards) {
-      runOptsFileSlurm(optsFilePathAfterwards, startAfterJobIds = jobIds, dependencyMode = "afterany")
+    for (optsFilePath in opts$optsFilePathsAfterwardsAlways) {
+      runOptsFileSlurm(optsFilePath, startAfterJobIds = jobIds, dependencyMode = "afterany")
     }
   }
-  if (hasValueString(opts$optsFilePathsAfterwardsIfok)) {
-    for (optsFilePathAfterwards in opts$optsFilePathsAfterwards) {
-      runOptsFileSlurm(optsFilePathAfterwards, startAfterJobIds = jobIds, dependencyMode = "afterok")
+  if (hasValueString(opts$optsFilePathsAfterwardsIfOk)) {
+    for (optsFilePath in opts$optsFilePathsAfterwardsIfOk) {
+      runOptsFileSlurm(optsFilePath, startAfterJobIds = jobIds, dependencyMode = "afterok")
     }
   }
 }
