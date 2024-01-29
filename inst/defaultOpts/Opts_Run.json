@@ -2,5 +2,6 @@
   "_class": ["Run", "Opts"],
   "slurm": {
     "_class": ["Slurm", "Opts"]
-  }
+  },
+  "optsFilePathsAfterwards": null
 }

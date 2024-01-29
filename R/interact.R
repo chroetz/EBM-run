@@ -9,8 +9,8 @@ interact <- function() {
       "exit" = "exit the program"))
   switch(
     choice,
-    run = interactRun(ignoreSlurm = TRUE),
-    slurm = interactRun(ignoreSlurm = FALSE),
+    run = interactRun(useSlurm = FALSE),
+    slurm = interactRun(useSlurm = TRUE),
     template = interactTemplate(),
     exit = interactExit()
   )
@@ -22,7 +22,7 @@ interactExit <- function() {
 }
 
 
-interactRun <- function(ignoreSlurm) {
+interactRun <- function(useSlurm) {
   choice <- getUserInput(
     "Choose what to do",
     c("search" = "search current directory for opts files",
@@ -30,18 +30,18 @@ interactRun <- function(ignoreSlurm) {
       "exit" = "exit the program"))
   switch(
     choice,
-    search = interactRunSearch(ignoreSlurm),
-    enter = interactRunEnter(ignoreSlurm),
+    search = interactRunSearch(useSlurm),
+    enter = interactRunEnter(useSlurm),
     exit = interactExit()
   )
 }
 
 
-interactRunEnter <- function(ignoreSlurm) {
+interactRunEnter <- function(useSlurm) {
   while(TRUE) {
     cat(
       "Will run opts file ",
-      if (ignoreSlurm) "directly" else "via slurm",
+      if (useSlurm) "via slurm" else "directly",
       ".\n",
       sep = "")
     cat("Enter file path to opts file (or nothing to exit):\n")
@@ -57,11 +57,11 @@ interactRunEnter <- function(ignoreSlurm) {
     }
     break
   }
-  runOptsFile(optsFilePath, ignoreSlurm)
+  runOptsFile(optsFilePath, useSlurm)
 }
 
 
-interactRunSearch <- function(ignoreSlurm, path = ".") {
+interactRunSearch <- function(useSlurm, path = ".") {
   optsFilePaths <- list.files(
     path = path,
     pattern = ".json$",
@@ -87,16 +87,20 @@ interactRunSearch <- function(ignoreSlurm, path = ".") {
   choice <- getUserInput(
     paste0(
       "Choose opts file to run",
-      if (ignoreSlurm) " (directly)" else " (via slurm)",
+      if (useSlurm) " (via slurm)" else " (directly)",
       ":"),
     choices)
   if (startsWith(choice, optsFilePrefix)) {
     optsFilePath <- normalizePath(
       file.path(path, substring(choice, nchar(optsFilePrefix)+1)),
       mustWork = TRUE)
-    runOptsFile(optsFilePath, ignoreSlurm)
+    if (useSlurm) {
+      runOptsFileSlurm(optsFilePath)
+    } else {
+      runOptsFileDirect(optsFilePath)
+    }
   } else if (startsWith(choice, dirPrefix)) {
-    interactRunSearch(ignoreSlurm, normalizePath(
+    interactRunSearch(useSlurm, normalizePath(
       file.path(path, substring(choice, nchar(dirPrefix)+1)),
       mustWork = TRUE))
   } else {

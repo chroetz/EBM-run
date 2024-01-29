@@ -6,7 +6,8 @@ executeCodeViaSlurm <- function(
     cpusPerTask = 1,
     timeInMinutes = NULL,
     mail = TRUE,
-    logDir = "_log"
+    logDir = "_log",
+    startAfterJobIds = NULL
 ) {
   if (isSlurmAvailable()) {
     jobName <- paste0(prefix, "_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"))
@@ -14,22 +15,41 @@ executeCodeViaSlurm <- function(
     escapedCmdStr <- gsub("\"", "\\\\\"", cmdStr)
     escapedCmdStr <- gsub("'", "\\\\\'", escapedCmdStr)
     if (!dir.exists(logDir)) dir.create(logDir)
-    command <- paste0(
-      "sbatch ",
-      " --qos=", qos,
-      " --nodes=1 --ntasks=1",
-      " --cpus-per-task=", cpusPerTask,
-      " --job-name=", jobName,
-      " --output=", file.path(logDir, paste0(jobName, "_%j.out")),
-      " --error=", file.path(logDir, paste0(jobName, "_%j.err")),
-      if (hasValue(timeInMinutes)) paste0(" --time ", timeInMinutes),
-      if (mail) " --mail-type=END",
-      " --wrap=\"Rscript -e '", escapedCmdStr, "'\"")
+    command <- createSlurmCommand(
+      qos, cpusPerTask, jobName, logDir, timeInMinutes, mail, startAfterJobIds,
+      paste0("\"Rscript -e '", escapedCmdStr, "'\""))
     cat(command, "\n")
-    x <- system(command, intern = TRUE)
-    cat("The value of x is", x, "\n")
+    output <- system(command, intern = TRUE)
+    jobId <- extractJobId(output)
+    return(jobId)
   } else {
     stop("Slurm is not available.")
+  }
+}
+
+
+createSlurmCommand <- function(qos, cpusPerTask, jobName, logDir, timeInMinutes, mail, startAfterJobIds, wrap) {
+  command <- paste0(
+    "sbatch ",
+    " --qos=", qos,
+    " --nodes=1 --ntasks=1",
+    " --cpus-per-task=", cpusPerTask,
+    " --job-name=", jobName,
+    " --output=", file.path(logDir, paste0(jobName, "_%j.out")),
+    " --error=", file.path(logDir, paste0(jobName, "_%j.err")),
+    if (hasValue(timeInMinutes)) paste0(" --time ", timeInMinutes),
+    if (mail) " --mail-type=END",
+    if (hasValue(startAfterJobIds)) paste0(" --dependency=afterok:", paste(startAfterJobIds, collapse=":")),
+    " --wrap=", wrap)
+  return(command)
+}
+
+
+extractJobId <- function(x) {
+  if (startsWith(x, "Submitted batch job ")) {
+    return(as.numeric(substring(x, 21)))
+  } else {
+    return(NA)
   }
 }
 
@@ -48,31 +68,28 @@ executeScriptViaSlurm <- function(
     cpusPerTask = 1,
     timeInMinutes = NULL,
     mail = TRUE,
-    logDir = "_log"
+    logDir = "_log",
+    startAfterJobIds = NULL
 ) {
   qos <- match.arg(qos)
   stopifnot(isSlurmAvailable())
   if (!dir.exists(logDir)) dir.create(logDir)
-  for (args in argList) {
+  for (i in seq_along(argList)) {
+    args <- argList[[i]]
     jobName <- paste0(
       prefix, "_",
       format(Sys.time(), "%Y-%m-%d_%H-%M-%S"), "_",
       gsub("[^a-zA-Z0-9]", "-", paste(args, collapse="-")))
     cat("Starting SLURM job", jobName, "\n")
-    command <- paste0(
-      "sbatch ",
-      " --qos=", qos,
-      " --nodes=1 --ntasks=1",
-      " --cpus-per-task=", cpusPerTask,
-      " --job-name=", jobName,
-      " --output=", file.path(logDir, paste0(jobName, "_%j.out")),
-      " --error=", file.path(logDir, paste0(jobName, "_%j.err")),
-      if (hasValue(timeInMinutes)) paste0(" --time ", timeInMinutes),
-      if (mail) " --mail-type=END",
-      " --wrap=\"Rscript '", scriptFilePath, "'",
-      " ", gsub("\"", "\\\\\"", paste(args, collapse=" ")), "\"")
+    command <- createSlurmCommand(
+      qos, cpusPerTask, jobName, logDir, timeInMinutes, mail, startAfterJobIds,
+      paste0(
+        "\"Rscript '", scriptFilePath, "'",
+        " ", gsub("\"", "\\\\\"", paste(args, collapse=" ")), "\""))
     cat(command, "\n")
-    x <- system(command, intern = TRUE)
-    cat("The value of x is", x, "\n")
+    output <- system(command, intern = TRUE)
+    jobId <- extractJobId(output)
+    names(argList)[i] <- as.character(jobId)
   }
+  return(argList)
 }

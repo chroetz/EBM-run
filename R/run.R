@@ -1,10 +1,7 @@
-#' @export
-runOptsFile <- function(optsFilePath, ignoreSlurm = FALSE, jobIdx = NULL) {
+
+runOptsFileSlurm <- function(optsFilePath, startAfterJobIds = NULL) {
   opts <- ConfigOpts::readOpts(optsFilePath)
-  if (ignoreSlurm) {
-    runOpts(opts, jobIdx)
-    return(invisible())
-  }
+  jobIds <- numeric(opts$slurm$nJobs)
   for (jobIdx in seq_len(opts$slurm$nJobs)) {
     prefix <- paste0(
       opts$slurm$prefix,
@@ -12,15 +9,51 @@ runOptsFile <- function(optsFilePath, ignoreSlurm = FALSE, jobIdx = NULL) {
       removeFileNameEnding(basename(optsFilePath)),
       "_",
       jobIdx)
-    cmdExpression <- rlang::expr(run::runOptsFile(!!optsFilePath, TRUE, !!jobIdx))
-    executeCodeViaSlurm(
+    cmdExpression <- rlang::expr(run::runOptsFile(!!optsFilePath, !!jobIdx))
+    jobIds[jobIdx] <- executeCodeViaSlurm(
       cmdStr = rlang::expr_text(cmdExpression, width = 500),
       prefix = prefix,
       qos = opts$slurm$qos,
       cpusPerTask = opts$slurm$cpusPerTask,
       timeInMinutes = opts$slurm$timeInMinutes,
       mail = opts$slurm$mail,
-      logDir = opts$slurm$logDir)
+      logDir = opts$slurm$logDir,
+      startAfterJobIds = startAfterJobIds)
+  }
+  runDependentJobsSlurm(optsFilePath, jobIds)
+  return(jobIds)
+}
+
+
+runOptsFileDirect <- function(optsFilePath) {
+  runOptsFile(optsFilePath)
+  runDependentJobsDirect(optsFilePath)
+}
+
+
+#' @export
+runOptsFile <- function(optsFilePath, jobIdx = NULL) {
+  opts <- ConfigOpts::readOpts(optsFilePath)
+  runOpts(opts, jobIdx)
+  return(invisible())
+}
+
+
+runDependentJobsSlurm <- function(optsFilePath, jobIds) {
+  opts <- ConfigOpts::readOpts(optsFilePath)
+  if (hasValueString(opts$optsFilePathsAfterwards)) {
+    for (optsFilePathAfterwards in opts$optsFilePathsAfterwards) {
+      runOptsFileSlurm(optsFilePathAfterwards, startAfterJobIds = jobIds)
+    }
+  }
+}
+
+runDependentJobsDirect <- function(optsFilePath) {
+  opts <- ConfigOpts::readOpts(optsFilePath)
+  if (hasValueString(opts$optsFilePathsAfterwards)) {
+    for (optsFilePathAfterwards in opts$optsFilePathsAfterwards) {
+      runOptsFileDirect(optsFilePathAfterwards)
+    }
   }
 }
 

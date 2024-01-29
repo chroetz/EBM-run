@@ -14,10 +14,10 @@ print.InteractionStarter <- function(x, ...) {
 
 #' @export
 print.SlurmInteractionStarter <- function(x, ...) {
-  interactRun(ignoreSlurm = FALSE)
+  interactRun(useSlurm = TRUE)
 }
 
 #' @export
 print.SearchSlurmInteractionStarter <- function(x, ...) {
-  interactRunSearch(ignoreSlurm = FALSE)
+  interactRunSearch(useSlurm = TRUE)
 }
