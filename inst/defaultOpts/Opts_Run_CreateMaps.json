@@ -6,7 +6,7 @@
   "dataTimeName": "year",
   "variableTrans": "identity",
   "limits": null,
-  "outOfBoundHandling": null,
+  "outOfBoundsHandling": null,
   "shapeFilePath": "path/to/shapefile.gpkg",
   "shapeRegionName": "GID_1",
   "outDir": "out/dir",
