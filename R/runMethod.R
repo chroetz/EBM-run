@@ -138,6 +138,8 @@ runMethodCreateMaps <- function(opts) {
     dataRegionName = opts$dataRegionName,
     dataTimeName = opts$dataTimeName,
     variableTrans = opts$variableTrans,
+    limits = opts$limits,
+    outOfBoundsHandling = opts$outOfBoundsHandling,
     shapeFilePath = opts$shapeFilePath,
     shapeRegionName = opts$shapeRegionName,
     outDir = opts$outDir,
