@@ -27,11 +27,9 @@ runMethodSumMask <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("SumMask", "Run"))
 
-  ProcessNetCdf::setupMaskSummation(
-    maskFilePath = opts$maskFilePath,
-    outFilePath = opts$outFilePath
-  )
+  args <- extractArgs(opts)
 
+  do.call(ProcessNetCdf::sumMask, args)
   ProcessNetCdf::runMaskSummation()
 }
 
@@ -43,18 +41,15 @@ runMethodAggregateNaryMasked <- function(opts) {
   exprList <- lapply(opts$aggregateTextList, rlang::parse_expr)
   names(exprList) <- names(opts$aggregateTextList)
 
-  ProcessNetCdf::aggregateNaryMasked(
-    maskFilePath = opts$maskFilePath,
-    maskSumFilePath = opts$maskSumFilePath,
-    boundingBoxFilePath = opts$boundingBoxFilePath,
-    variableDataDescriptorList = opts$variableDataDescriptorList,
-    outFilePath = paste0(opts$outFilePrefix, "_", opts$slurm$jobIdx, ".csv"),
-    aggregateExpression = exprList,
+  args <- extractArgs(
+    opts,
     nBatches = opts$slurm$nJobs,
     batchIndex = opts$slurm$jobIdx,
-    yearsFilter = opts$yearsFilter,
-    regionRegex = opts$regionRegex
-  )
+    outFilePath = paste0(opts$outFilePrefix, "_", opts$slurm$jobIdx, ".csv"),
+    aggregateExpression = exprList,
+    .remove = c("aggregateTextList", "outFilePrefix"))
+
+  do.call(ProcessNetCdf::aggregateNaryMasked, args)
 }
 
 
@@ -83,12 +78,12 @@ runMethodShapeToMaskOneFilePerRegion <- function(opts) {
 
   cat("Found", length(shapeFilePaths), "shape files.\n")
 
-  ProcessNetCdf::runShapeToMaskOneFilePerRegion(
+  args <- extractArgs(
+    opts,
     shapeFilePaths = shapeFilePaths,
-    nLon = opts$nLon,
-    nLat = opts$nLat,
-    outFilePath = opts$outFilePath
-  )
+    .remove = c("shapeFileDir", "shapeFilePattern"))
+
+  do.call(ProcessNetCdf::runShapeToMaskOneFilePerRegion, args)
 }
 
 
@@ -102,16 +97,15 @@ runMethodShapeToMaskOneFileForAllRegions <- function(opts) {
     metaOutFilePath <- opts$metaOutFilePath
   }
 
-  ProcessNetCdf::runShapeToMaskOneFileForAllRegions(
-    shapeFilePath = opts$shapeFilePath,
-    nLon = opts$nLon,
-    nLat = opts$nLat,
+  args <- extractArgs(
+    opts,
     outFilePath = paste0(opts$outFilePrefix, "_", opts$slurm$jobIdx, ".nc"),
     metaOutFilePath = metaOutFilePath,
-    idColumnName = opts$idColumnName,
     nBatches = opts$slurm$nJobs,
-    batchIndex = opts$slurm$jobIdx
-  )
+    batchIndex = opts$slurm$jobIdx,
+    .remove = c("metaOutFilePath", "outFilePrefix"))
+
+  do.call(ProcessNetCdf::runShapeToMaskOneFileForAllRegions, args)
 }
 
 
@@ -119,12 +113,9 @@ runMethodConcatNetCdf <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("ConcatNetCdf", "Run"))
 
-  ProcessNetCdf::runConcatNetCdf(
-    outFilePath = opts$outFilePath,
-    inFileDir = opts$inFileDir,
-    inFilePattern = opts$inFilePattern
-  )
+  args <- extractArgs(opts)
 
+  do.call(ProcessNetCdf::runConcatNetCdf, args)
 }
 
 
@@ -132,25 +123,12 @@ runMethodCreateMaps <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("CreateMaps", "Run"))
 
-  ExploreData::createMaps(
-    dataFilePath = opts$dataFilePath,
-    dataVariableName = opts$dataVariableName,
-    dataRegionName = opts$dataRegionName,
-    dataTimeName = opts$dataTimeName,
-    variableTrans = opts$variableTrans,
-    limits = opts$limits,
-    outOfBoundsHandling = opts$outOfBoundsHandling,
-    shapeFilePath = opts$shapeFilePath,
-    shapeRegionName = opts$shapeRegionName,
-    outDir = opts$outDir,
-    widthInPx = opts$widthInPx,
-    heightInPx = opts$heightInPx,
-    dpi = opts$dpi,
+  args <- extractArgs(
+    opts,
     nBatches = opts$slurm$nJobs,
-    batchIndex = opts$slurm$jobIdx,
-    timeFilter = opts$timeFilter,
-    regionRegex = opts$regionRegex
-  )
+    batchIndex = opts$slurm$jobIdx)
+
+  do.call(ExploreData::createMaps, args)
 }
 
 
@@ -158,16 +136,12 @@ runMethodImagesToVideo <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("ImagesToVideo", "Run"))
 
-  ExploreData::createVideo(
-    imageDirPath = opts$imageDirPath,
-    outDirPath = opts$outDirPath,
-    outFileGlue = opts$outFileGlue,
-    frameRate = opts$frameRate,
-    outFormat = opts$outFormat,
-    keepInfoTxtFile = opts$keepInfoTxtFile,
+  args <- extractArgs(
+    opts,
     nBatches = opts$slurm$nJobs,
-    batchIndex = opts$slurm$jobIdx
-  )
+    batchIndex = opts$slurm$jobIdx)
+
+  do.call(ExploreData::imagesToVideo, args)
 }
 
 

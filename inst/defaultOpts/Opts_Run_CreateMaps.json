@@ -10,6 +10,8 @@
   "shapeFilePath": "path/to/shapefile.gpkg",
   "shapeRegionName": "GID_1",
   "outDir": "out/dir",
+  "outFileGlue": "{dataSetName}_{dataVariableName}_{variableTrans}_{dataTimeValue}.png",
+  "plotTitleGlue": "{dataSetName} {dataTimeValue}",
   "widthInPx": 1920,
   "heightInPx": 1080,
   "dpi": 150,
