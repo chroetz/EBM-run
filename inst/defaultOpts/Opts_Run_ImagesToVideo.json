@@ -2,8 +2,9 @@
   "_class": ["ImagesToVideo", "Run", "Opts"],
   "imageDirPath": "path/to/dir",
   "outDirPath": "path/to/dir",
+  "outFileGlue": "{prefix}_r{round(frameRate)}.{outFileEnding}",
   "frameRate": 5,
-  "outFormat": "mpeg4",
+  "outFormat": "gif",
   "keepInfoTxtFile": false,
   "nBatches": 1,
   "batchIndex": 1

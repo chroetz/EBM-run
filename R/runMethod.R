@@ -161,6 +161,7 @@ runMethodImagesToVideo <- function(opts) {
   ExploreData::createVideo(
     imageDirPath = opts$imageDirPath,
     outDirPath = opts$outDirPath,
+    outFileGlue = opts$outFileGlue,
     frameRate = opts$frameRate,
     outFormat = opts$outFormat,
     keepInfoTxtFile = opts$keepInfoTxtFile,
