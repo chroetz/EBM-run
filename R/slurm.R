@@ -7,7 +7,8 @@ executeCodeViaSlurm <- function(
     timeInMinutes = NULL,
     mail = TRUE,
     logDir = "_log",
-    startAfterJobIds = NULL
+    startAfterJobIds = NULL,
+    dependencyMode = NULL
 ) {
   if (isSlurmAvailable()) {
     jobName <- paste0(prefix, "_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"))
@@ -16,7 +17,7 @@ executeCodeViaSlurm <- function(
     escapedCmdStr <- gsub("'", "\\\\\'", escapedCmdStr)
     if (!dir.exists(logDir)) dir.create(logDir)
     command <- createSlurmCommand(
-      qos, cpusPerTask, jobName, logDir, timeInMinutes, mail, startAfterJobIds,
+      qos, cpusPerTask, jobName, logDir, timeInMinutes, mail, startAfterJobIds, dependencyMode,
       paste0("\"Rscript -e '", escapedCmdStr, "'\""))
     cat(command, "\n")
     output <- system(command, intern = TRUE)
@@ -28,7 +29,17 @@ executeCodeViaSlurm <- function(
 }
 
 
-createSlurmCommand <- function(qos, cpusPerTask, jobName, logDir, timeInMinutes, mail, startAfterJobIds, wrap) {
+createSlurmCommand <- function(
+    qos,
+    cpusPerTask,
+    jobName,
+    logDir,
+    timeInMinutes,
+    mail,
+    startAfterJobIds,
+    dependencyMode,
+    wrap
+) {
   command <- paste0(
     "sbatch ",
     " --qos=", qos,
@@ -39,7 +50,7 @@ createSlurmCommand <- function(qos, cpusPerTask, jobName, logDir, timeInMinutes,
     " --error=", file.path(logDir, paste0(jobName, "_%j.err")),
     if (hasValue(timeInMinutes)) paste0(" --time ", timeInMinutes),
     if (mail) " --mail-type=END",
-    if (hasValue(startAfterJobIds)) paste0(" --dependency=afterok:", paste(startAfterJobIds, collapse=":")),
+    if (hasValue(startAfterJobIds)) paste0(" --dependency=", dependencyMode, ":", paste(startAfterJobIds, collapse=":")),
     " --wrap=", wrap)
   return(command)
 }

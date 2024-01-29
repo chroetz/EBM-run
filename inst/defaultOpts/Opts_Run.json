@@ -3,5 +3,6 @@
   "slurm": {
     "_class": ["Slurm", "Opts"]
   },
-  "optsFilePathsAfterwards": null
+  "optsFilePathsAfterwardsAlways": null,
+  "optsFilePathsAfterwardsIfOk": null
 }

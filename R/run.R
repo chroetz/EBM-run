@@ -1,5 +1,5 @@
 
-runOptsFileSlurm <- function(optsFilePath, startAfterJobIds = NULL) {
+runOptsFileSlurm <- function(optsFilePath, startAfterJobIds = NULL, dependencyMode = NULL) {
   opts <- ConfigOpts::readOpts(optsFilePath)
   jobIds <- numeric(opts$slurm$nJobs)
   for (jobIdx in seq_len(opts$slurm$nJobs)) {
@@ -18,7 +18,8 @@ runOptsFileSlurm <- function(optsFilePath, startAfterJobIds = NULL) {
       timeInMinutes = opts$slurm$timeInMinutes,
       mail = opts$slurm$mail,
       logDir = opts$slurm$logDir,
-      startAfterJobIds = startAfterJobIds)
+      startAfterJobIds = startAfterJobIds,
+      dependencyMode = dependencyMode)
   }
   runDependentJobsSlurm(optsFilePath, jobIds)
   return(jobIds)
@@ -41,17 +42,25 @@ runOptsFile <- function(optsFilePath, jobIdx = NULL) {
 
 runDependentJobsSlurm <- function(optsFilePath, jobIds) {
   opts <- ConfigOpts::readOpts(optsFilePath)
-  if (hasValueString(opts$optsFilePathsAfterwards)) {
+  if (hasValueString(opts$optsFilePathsAfterwardsAlways)) {
     for (optsFilePathAfterwards in opts$optsFilePathsAfterwards) {
-      runOptsFileSlurm(optsFilePathAfterwards, startAfterJobIds = jobIds)
+      runOptsFileSlurm(optsFilePathAfterwards, startAfterJobIds = jobIds, dependencyMode = "afterany")
+    }
+  }
+  if (hasValueString(opts$optsFilePathsAfterwardsIfok)) {
+    for (optsFilePathAfterwards in opts$optsFilePathsAfterwards) {
+      runOptsFileSlurm(optsFilePathAfterwards, startAfterJobIds = jobIds, dependencyMode = "afterok")
     }
   }
 }
 
 runDependentJobsDirect <- function(optsFilePath) {
   opts <- ConfigOpts::readOpts(optsFilePath)
-  if (hasValueString(opts$optsFilePathsAfterwards)) {
-    for (optsFilePathAfterwards in opts$optsFilePathsAfterwards) {
+  optsFilePathsAfterwards <-  c(
+    opts$optsFilePathsAfterwardsAlways,
+    opts$optsFilePathsAfterwardsIfok)
+  if (hasValueString(optsFilePathsAfterwards)) {
+    for (optsFilePathAfterwards in optsFilePathsAfterwards) {
       runOptsFileDirect(optsFilePathAfterwards)
     }
   }
