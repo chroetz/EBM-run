@@ -141,7 +141,7 @@ runMethodImagesToVideo <- function(opts) {
     nBatches = opts$slurm$nJobs,
     batchIndex = opts$slurm$jobIdx)
 
-  do.call(ExploreData::imagesToVideo, args)
+  do.call(ExploreData::createVideo, args)
 }
 
 
