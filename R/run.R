@@ -93,6 +93,7 @@ runOpts <- function(opts, jobIdx=NULL) {
     ConcatNetCdf = runMethodConcatNetCdf(opts),
     CreateMaps = runMethodCreateMaps(opts),
     ImagesToVideo = runMethodImagesToVideo(opts),
+    Summary = runMethodSummary(opts),
     stop("Unknown method: ", subclass)
   )
   cat("\nEND Run", subclass, "after", (proc.time()-pt)[3], "s\n")

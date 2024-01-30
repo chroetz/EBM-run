@@ -83,7 +83,7 @@ runMethodShapeToMaskOneFilePerRegion <- function(opts) {
     shapeFilePaths = shapeFilePaths,
     .remove = c("shapeFileDir", "shapeFilePattern"))
 
-  do.call(ProcessNetCdf::runShapeToMaskOneFilePerRegion, args)
+  do.call(ProcessNetCdf::runShapeToMaskOneFilePerRegion, args, quote = TRUE)
 }
 
 
@@ -105,7 +105,7 @@ runMethodShapeToMaskOneFileForAllRegions <- function(opts) {
     batchIndex = opts$slurm$jobIdx,
     .remove = c("metaOutFilePath", "outFilePrefix"))
 
-  do.call(ProcessNetCdf::runShapeToMaskOneFileForAllRegions, args)
+  do.call(ProcessNetCdf::runShapeToMaskOneFileForAllRegions, args, quote = TRUE)
 }
 
 
@@ -115,7 +115,7 @@ runMethodConcatNetCdf <- function(opts) {
 
   args <- extractArgs(opts)
 
-  do.call(ProcessNetCdf::runConcatNetCdf, args)
+  do.call(ProcessNetCdf::runConcatNetCdf, args, quote = TRUE)
 }
 
 
@@ -128,7 +128,7 @@ runMethodCreateMaps <- function(opts) {
     nBatches = opts$slurm$nJobs,
     batchIndex = opts$slurm$jobIdx)
 
-  do.call(ExploreData::createMaps, args)
+  do.call(ExploreData::createMaps, args, quote = TRUE)
 }
 
 
@@ -141,7 +141,29 @@ runMethodImagesToVideo <- function(opts) {
     nBatches = opts$slurm$nJobs,
     batchIndex = opts$slurm$jobIdx)
 
-  do.call(ExploreData::createVideo, args)
+  do.call(ExploreData::createVideo, args, quote = TRUE)
 }
 
 
+runMethodSummary <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("Summary", "Run"))
+
+  args <- extractArgs(
+    opts,
+    outDir = dirname(opts$outFilePath),
+    outFileName = EbmUtility::removeFileNameEnding(basename(opts$outFilePath)),
+    outFormat = EbmUtility::getFileNameEnding(opts$outFilePath),
+    aggregateFunctions =
+      opts$aggregateFunctionsText |>
+      rlang::parse_expr(),
+    transformations =
+      opts$transformationsText |>
+      rlang::parse_expr(),
+    .remove = c(
+      "outFilePath",
+      "aggregateFunctionsText",
+      "transformationsText"))
+
+  do.call(ExploreData::renderSummary, args, quote = TRUE)
+}
