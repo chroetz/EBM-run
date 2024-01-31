@@ -81,7 +81,9 @@ runOpts <- function(opts, jobIdx=NULL) {
   }
 
   cat("Run started at ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n", sep="")
-  loadNamespace("ProcessNetCdf") # to make sure its info is printed
+  loadNamespace("cerProcessNetCdf") # to make sure its info is printed
+  loadNamespace("cerExploreData") # to make sure its info is printed
+  loadNamespace("cerUtility") # to make sure its info is printed
   printPackagesInfo()
   cat("Run Opts:\n", format(opts), "\n\n", sep="")
 

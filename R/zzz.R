@@ -2,6 +2,6 @@
   ConfigOpts::addPackageToPathDefaults(
     system.file("defaultOpts", package=pkgname, lib.loc=libname))
   ConfigOpts::addPackageToPathDefaults(
-    system.file("defaultOpts", package="ProcessNetCdf", lib.loc=libname))
+    system.file("defaultOpts", package="cerProcessNetCdf", lib.loc=libname))
   invisible(NULL)
 }

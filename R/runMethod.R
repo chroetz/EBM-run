@@ -14,7 +14,7 @@ runMethodBoundingBoxes <- function(opts) {
   boundingBoxes <- cerProcessNetCdf::getBoundingBoxesFromMask(maskFilePath)
   cat("obtained", ncol(boundingBoxes), "bounding boxes in ", (proc.time()-pt)[3],"s\n")
   cat("saving bounding boxes to file ", outFilePath, "... ")
-  ProcessNetCdf::saveBoundingBoxes(
+  cerProcessNetCdf::saveBoundingBoxes(
     boundingBoxes,
     outFilePath,
     maskFilePath,
@@ -74,7 +74,7 @@ runMethodShapeToMaskOneFilePerRegion <- function(opts) {
 
   filePaths <- list.files(opts$shapeFileDir, full.names = TRUE, recursive=TRUE)
   shapeFilePaths <- stringr::str_subset(filePaths, opts$shapeFilePattern)
-  names(shapeFilePaths) <- cerEbmUtility::uniqueMiddle(shapeFilePaths)
+  names(shapeFilePaths) <- cerUtility::uniqueMiddle(shapeFilePaths)
 
   cat("Found", length(shapeFilePaths), "shape files.\n")
 
@@ -152,8 +152,8 @@ runMethodSummary <- function(opts) {
   args <- extractArgs(
     opts,
     outDir = dirname(opts$outFilePath),
-    outFileName = cerEbmUtility::removeFileNameEnding(basename(opts$outFilePath)),
-    outFormat = cerEbmUtility::getFileNameEnding(opts$outFilePath),
+    outFileName = cerUtility::removeFileNameEnding(basename(opts$outFilePath)),
+    outFormat = cerUtility::getFileNameEnding(opts$outFilePath),
     aggregateFunctions =
       opts$aggregateFunctionsText |>
       rlang::parse_expr(),
