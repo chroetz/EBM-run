@@ -1,17 +1,17 @@
 # Default values of environment variables.
 environmentVariables <- list(
-  SNA_ROOT = "..",
-  SNA_DATA = "{SNA_ROOT}/data",
-  SNA_PROCESSED = "{SNA_ROOT}/processed",
-  SNA_RUN = "{SNA_ROOT}/run",
-  SNA_VARIABLE = "{SNA_ROOT}/variable",
-  SNA_EXPLORE = "{SNA_ROOT}/explore"
+  CER_ROOT = "..",
+  CER_DATA = "{CER_ROOT}/data",
+  CER_PROCESSED = "{CER_ROOT}/processed",
+  CER_RUN = "{CER_ROOT}/run",
+  CER_VARIABLE = "{CER_ROOT}/variable",
+  CER_EXPLORE = "{CER_ROOT}/explore"
 )
 
 
 # Check system environment variables and overwrite default values.
 loadEnvironmentVariables <- function() {
-  snaNames <- Sys.getenv(names = TRUE) |> names() |> str_subset("^SNA_")
+  snaNames <- Sys.getenv(names = TRUE) |> names() |> str_subset("^CER_")
   for (nm in snaNames) {
     environmentVariables[[nm]] <<- Sys.getenv(nm)
   }
