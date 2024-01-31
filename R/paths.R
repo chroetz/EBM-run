@@ -36,11 +36,14 @@ expandPath <- function(path, mustWork = FALSE) {
 expandAllVariablesEndingInPath <- function(lst) {
   loadEnvironmentVariables()
   for (i in seq_along(lst)) {
-    if (is.character(lst[[i]]) && (names(lst)[i] |> endsWith("Path"))) {
-      lst[[i]] <- expandPath(lst[[i]])
+    if (is.character(lst[[i]]) && str_detect(names(lst)[i], "(Path$)|(Paths$)")) {
+      for (j in seq_along(lst[[i]])) {
+        lst[[i]][[j]] <- expandPath(lst[[i]][[j]])
+      }
     } else if (is.list(lst[[i]])) {
       lst[[i]] <- expandAllVariablesEndingInPath(lst[[i]])
     }
   }
+  return(lst)
 }
 
