@@ -45,13 +45,13 @@ runOptsFile <- function(optsFilePath, jobIdx = NULL) {
 runDependentJobsSlurm <- function(optsFilePath, jobIds) {
   opts <- ConfigOpts::readOpts(optsFilePath)
   opts <- expandAllVariablesEndingInPath(opts)
-  if (hasValueString(opts$optsFilePathsAfterwardsAlways)) {
-    for (optsFilePath in opts$optsFilePathsAfterwardsAlways) {
+  if (hasValueString(opts$optsAfterwardsAlwaysFilePaths)) {
+    for (optsFilePath in opts$optsAfterwardsAlwaysFilePaths) {
       runOptsFileSlurm(optsFilePath, startAfterJobIds = jobIds, dependencyMode = "afterany")
     }
   }
-  if (hasValueString(opts$optsFilePathsAfterwardsIfOk)) {
-    for (optsFilePath in opts$optsFilePathsAfterwardsIfOk) {
+  if (hasValueString(opts$optsAfterwardsIfOkFilePaths)) {
+    for (optsFilePath in opts$optsAfterwardsIfOkFilePaths) {
       runOptsFileSlurm(optsFilePath, startAfterJobIds = jobIds, dependencyMode = "afterok")
     }
   }
@@ -62,8 +62,8 @@ runDependentJobsDirect <- function(optsFilePath) {
   opts <- ConfigOpts::readOpts(optsFilePath)
   opts <- expandAllVariablesEndingInPath(opts)
   optsFilePathsAfterwards <-  c(
-    opts$optsFilePathsAfterwardsAlways,
-    opts$optsFilePathsAfterwardsIfok)
+    opts$optsAfterwardsAlwaysFilePaths,
+    opts$optsAfterwardsIfOkFilePaths)
   if (hasValueString(optsFilePathsAfterwards)) {
     for (optsFilePathAfterwards in optsFilePathsAfterwards) {
       runOptsFileDirect(optsFilePathAfterwards)
