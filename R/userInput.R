@@ -17,7 +17,7 @@ getUserInput <- function(title, options, multi = FALSE, default = NULL, onlyNrs 
   possibleChoicesNr <- NULL
   if (multi) {
     allText <- " 0: all"
-    if (default == "all") allText <-  crayon::cyan(allText)
+    if (!is.null(default) && default == "all") allText <-  crayon::cyan(allText)
     cat(allText, "\n")
     possibleChoices <- c(possibleChoices, "all")
     possibleChoicesNr <- c(possibleChoicesNr, 0)

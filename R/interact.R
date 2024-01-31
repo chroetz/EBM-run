@@ -83,28 +83,45 @@ interactRunSearch <- function(useSlurm, path = ".") {
     if (length(dirPrefix) > 0)
       paste0(dirPrefix, dirPaths)
     else
-        character(0))
-  choice <- getUserInput(
+      character(0))
+  print(choices)
+  chosen <- getUserInput(
     paste0(
       "Choose opts file to run",
       if (useSlurm) " (via slurm)" else " (directly)",
-      ":"),
+      " or directory to enter:"),
+    multi = TRUE,
     choices)
-  if (startsWith(choice, optsFilePrefix)) {
-    optsFilePath <- normalizePath(
-      file.path(path, substring(choice, nchar(optsFilePrefix)+1)),
-      mustWork = TRUE)
-    if (useSlurm) {
-      runOptsFileSlurm(optsFilePath)
+  if (length(chosen) == 1) {
+    if (startsWith(chosen, optsFilePrefix)) {
+      optsFilePath <- normalizePath(
+        file.path(path, substring(chosen, nchar(optsFilePrefix)+1)),
+        mustWork = TRUE)
+      if (useSlurm) {
+        runOptsFileSlurm(optsFilePath)
+      } else {
+        runOptsFileDirect(optsFilePath)
+      }
+    } else if (startsWith(chosen, dirPrefix)) {
+      interactRunSearch(useSlurm, normalizePath(
+        file.path(path, substring(chosen, nchar(dirPrefix)+1)),
+        mustWork = TRUE))
     } else {
-      runOptsFileDirect(optsFilePath)
+      stop("Unknown choice: ", chosen)
     }
-  } else if (startsWith(choice, dirPrefix)) {
-    interactRunSearch(useSlurm, normalizePath(
-      file.path(path, substring(choice, nchar(dirPrefix)+1)),
-      mustWork = TRUE))
   } else {
-    stop("Unknown choice: ", choice)
+    for (choice in chosen) { # do not enter directories if multiple things are chosen
+      if (startsWith(choice, optsFilePrefix)) {
+        optsFilePath <- normalizePath(
+          file.path(path, substring(choice, nchar(optsFilePrefix)+1)),
+          mustWork = TRUE)
+        if (useSlurm) {
+          runOptsFileSlurm(optsFilePath)
+        } else {
+          runOptsFileDirect(optsFilePath)
+        }
+      }
+    }
   }
 }
 
