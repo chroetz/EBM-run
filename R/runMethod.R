@@ -11,7 +11,7 @@ runMethodBoundingBoxes <- function(opts) {
     "_boundingBox.nc")
 
   pt <- proc.time()
-  boundingBoxes <- ProcessNetCdf::getBoundingBoxesFromMask(maskFilePath)
+  boundingBoxes <- cerProcessNetCdf::getBoundingBoxesFromMask(maskFilePath)
   cat("obtained", ncol(boundingBoxes), "bounding boxes in ", (proc.time()-pt)[3],"s\n")
   cat("saving bounding boxes to file ", outFilePath, "... ")
   ProcessNetCdf::saveBoundingBoxes(
@@ -29,8 +29,8 @@ runMethodSumMask <- function(opts) {
 
   args <- extractArgs(opts)
 
-  do.call(ProcessNetCdf::setupMaskSummation, args)
-  ProcessNetCdf::runMaskSummation()
+  do.call(cerProcessNetCdf::setupMaskSummation, args)
+  cerProcessNetCdf::runMaskSummation()
 }
 
 
@@ -49,7 +49,7 @@ runMethodAggregateNaryMasked <- function(opts) {
     aggregateExpression = exprList,
     .remove = c("aggregateTextList", "outFilePrefix"))
 
-  do.call(ProcessNetCdf::aggregateNaryMasked, args)
+  do.call(cerProcessNetCdf::aggregateNaryMasked, args)
 }
 
 
@@ -74,7 +74,7 @@ runMethodShapeToMaskOneFilePerRegion <- function(opts) {
 
   filePaths <- list.files(opts$shapeFileDir, full.names = TRUE, recursive=TRUE)
   shapeFilePaths <- stringr::str_subset(filePaths, opts$shapeFilePattern)
-  names(shapeFilePaths) <- EbmUtility::uniqueMiddle(shapeFilePaths)
+  names(shapeFilePaths) <- cerEbmUtility::uniqueMiddle(shapeFilePaths)
 
   cat("Found", length(shapeFilePaths), "shape files.\n")
 
@@ -83,7 +83,7 @@ runMethodShapeToMaskOneFilePerRegion <- function(opts) {
     shapeFilePaths = shapeFilePaths,
     .remove = c("shapeFileDir", "shapeFilePattern"))
 
-  do.call(ProcessNetCdf::runShapeToMaskOneFilePerRegion, args, quote = TRUE)
+  do.call(cerProcessNetCdf::runShapeToMaskOneFilePerRegion, args, quote = TRUE)
 }
 
 
@@ -105,7 +105,7 @@ runMethodShapeToMaskOneFileForAllRegions <- function(opts) {
     batchIndex = opts$slurm$jobIdx,
     .remove = c("metaOutFilePath", "outFilePrefix"))
 
-  do.call(ProcessNetCdf::runShapeToMaskOneFileForAllRegions, args, quote = TRUE)
+  do.call(cerProcessNetCdf::runShapeToMaskOneFileForAllRegions, args, quote = TRUE)
 }
 
 
@@ -115,7 +115,7 @@ runMethodConcatNetCdf <- function(opts) {
 
   args <- extractArgs(opts)
 
-  do.call(ProcessNetCdf::runConcatNetCdf, args, quote = TRUE)
+  do.call(cerProcessNetCdf::runConcatNetCdf, args, quote = TRUE)
 }
 
 
@@ -128,7 +128,7 @@ runMethodCreateMaps <- function(opts) {
     nBatches = opts$slurm$nJobs,
     batchIndex = opts$slurm$jobIdx)
 
-  do.call(ExploreData::createMaps, args, quote = TRUE)
+  do.call(cerExploreData::createMaps, args, quote = TRUE)
 }
 
 
@@ -141,7 +141,7 @@ runMethodImagesToVideo <- function(opts) {
     nBatches = opts$slurm$nJobs,
     batchIndex = opts$slurm$jobIdx)
 
-  do.call(ExploreData::createVideo, args, quote = TRUE)
+  do.call(cerExploreData::createVideo, args, quote = TRUE)
 }
 
 
@@ -152,8 +152,8 @@ runMethodSummary <- function(opts) {
   args <- extractArgs(
     opts,
     outDir = dirname(opts$outFilePath),
-    outFileName = EbmUtility::removeFileNameEnding(basename(opts$outFilePath)),
-    outFormat = EbmUtility::getFileNameEnding(opts$outFilePath),
+    outFileName = cerEbmUtility::removeFileNameEnding(basename(opts$outFilePath)),
+    outFormat = cerEbmUtility::getFileNameEnding(opts$outFilePath),
     aggregateFunctions =
       opts$aggregateFunctionsText |>
       rlang::parse_expr(),
@@ -165,5 +165,5 @@ runMethodSummary <- function(opts) {
       "aggregateFunctionsText",
       "transformationsText"))
 
-  do.call(ExploreData::renderSummary, args, quote = TRUE)
+  do.call(cerExploreData::renderSummary, args, quote = TRUE)
 }
