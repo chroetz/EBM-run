@@ -1,5 +1,6 @@
 # Default values of environment variables.
-environmentVariables <- list(
+environmentVariables <- new.env(parent = emptyenv())
+environmentVariablesDefault <- list(
   CER_ROOT = "..",
   CER_DATA = "{CER_ROOT}/data",
   CER_PROCESSED = "{CER_ROOT}/processed",
@@ -11,9 +12,12 @@ environmentVariables <- list(
 
 # Check system environment variables and overwrite default values.
 loadEnvironmentVariables <- function() {
+  lapply(
+    names(environmentVariablesDefault),
+    \(nm) assign(nm, environmentVariablesDefault[[nm]], envir = environmentVariables))
   snaNames <- Sys.getenv(names = TRUE) |> names() |> str_subset("^CER_")
   for (nm in snaNames) {
-    environmentVariables[[nm]] <<- Sys.getenv(nm)
+    environmentVariables[[nm]] <- Sys.getenv(nm)
   }
 }
 
@@ -22,9 +26,7 @@ loadEnvironmentVariables <- function() {
 expandPath <- function(path, mustWork = FALSE) {
   while(TRUE) {
     pathNew <- str_glue_data(environmentVariables, path)
-    if (pathNew == path) {
-      break
-    }
+    if (pathNew == path) break
     path <- pathNew
   }
   normalizePath(path, mustWork = mustWork)

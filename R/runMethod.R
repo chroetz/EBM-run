@@ -81,7 +81,7 @@ runMethodShapeToMaskOneFilePerRegion <- function(opts) {
   args <- extractArgs(
     opts,
     shapeFilePaths = shapeFilePaths,
-    .remove = c("shapeFileDir", "shapeFilePattern"))
+    .remove = c("shapeFileDirPath", "shapeFilePattern"))
 
   do.call(cerProcessNetCdf::runShapeToMaskOneFilePerRegion, args, quote = TRUE)
 }
