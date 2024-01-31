@@ -17,6 +17,6 @@
   "dpi": 150,
   "nBatches": 1,
   "batchIndex": 1,
-  "timeFilter": null,
+  "timeRange": null,
   "regionRegex": null
 }
