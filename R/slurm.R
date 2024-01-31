@@ -1,7 +1,7 @@
 #' @export
 executeCodeViaSlurm <- function(
     cmdStr,
-    prefix = "run",
+    prefix = "cer",
     qos = c("standby", "priority", "io", "short", "medium", "long", "gpushort", "gpumedium", "gpulong", "gpupreempt"),
     cpusPerTask = 1,
     timeInMinutes = NULL,
@@ -74,7 +74,7 @@ isSlurmAvailable <- function() {
 executeScriptViaSlurm <- function(
     scriptFilePath,
     argList,
-    prefix = "run",
+    prefix = "cer",
     qos = c("standby", "priority", "io", "short", "medium", "long", "gpushort", "gpumedium", "gpulong", "gpupreempt"),
     cpusPerTask = 1,
     timeInMinutes = NULL,

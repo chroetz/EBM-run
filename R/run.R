@@ -10,7 +10,7 @@ runOptsFileSlurm <- function(optsFilePath, startAfterJobIds = NULL, dependencyMo
       removeFileNameEnding(basename(optsFilePath)),
       "_",
       jobIdx)
-    cmdExpression <- rlang::expr(run::runOptsFile(!!optsFilePath, !!jobIdx))
+    cmdExpression <- rlang::expr(cer::runOptsFile(!!optsFilePath, !!jobIdx))
     jobIds[jobIdx] <- executeCodeViaSlurm(
       cmdStr = rlang::expr_text(cmdExpression, width = 500),
       prefix = prefix,

@@ -1,6 +1,6 @@
 #' @export
 interact <- function() {
-  cat("Welcome to the R package run!\n")
+  cat("Welcome to the R package cer!\n")
   choice <- getUserInput(
     "Choose what to do:",
     c("slurm" = "use slurm to run a command with opts file",
