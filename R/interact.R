@@ -84,7 +84,6 @@ interactRunSearch <- function(useSlurm, path = ".") {
       paste0(dirPrefix, dirPaths)
     else
       character(0))
-  print(choices)
   chosen <- getUserInput(
     paste0(
       "Choose opts file to run",
