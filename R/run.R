@@ -1,6 +1,7 @@
 
 runOptsFileSlurm <- function(optsFilePath, startAfterJobIds = NULL, dependencyMode = NULL) {
   opts <- ConfigOpts::readOpts(optsFilePath)
+  opts <- expandAllVariablesEndingInPath(opts)
   jobIds <- numeric(opts$slurm$nJobs)
   for (jobIdx in seq_len(opts$slurm$nJobs)) {
     prefix <- paste0(
@@ -35,6 +36,7 @@ runOptsFileDirect <- function(optsFilePath) {
 #' @export
 runOptsFile <- function(optsFilePath, jobIdx = NULL) {
   opts <- ConfigOpts::readOpts(optsFilePath)
+  opts <- expandAllVariablesEndingInPath(opts)
   runOpts(opts, jobIdx)
   return(invisible())
 }
@@ -42,6 +44,7 @@ runOptsFile <- function(optsFilePath, jobIdx = NULL) {
 
 runDependentJobsSlurm <- function(optsFilePath, jobIds) {
   opts <- ConfigOpts::readOpts(optsFilePath)
+  opts <- expandAllVariablesEndingInPath(opts)
   if (hasValueString(opts$optsFilePathsAfterwardsAlways)) {
     for (optsFilePath in opts$optsFilePathsAfterwardsAlways) {
       runOptsFileSlurm(optsFilePath, startAfterJobIds = jobIds, dependencyMode = "afterany")
@@ -54,8 +57,10 @@ runDependentJobsSlurm <- function(optsFilePath, jobIds) {
   }
 }
 
+
 runDependentJobsDirect <- function(optsFilePath) {
   opts <- ConfigOpts::readOpts(optsFilePath)
+  opts <- expandAllVariablesEndingInPath(opts)
   optsFilePathsAfterwards <-  c(
     opts$optsFilePathsAfterwardsAlways,
     opts$optsFilePathsAfterwardsIfok)
