@@ -11,11 +11,9 @@ environmentVariables <- list(
 
 # Check system environment variables and overwrite default values.
 loadEnvironmentVariables <- function() {
-  for (nm in names(environmentVariables)) {
-    value <- Sys.getenv(nm)
-    if (value != "") {
-      environmentVariables[[nm]] <<- value
-    }
+  snaNames <- Sys.getenv(names = TRUE) |> names() |> str_subset("^SNA_")
+  for (nm in snaNames) {
+    environmentVariables[[nm]] <<- Sys.getenv(nm)
   }
 }
 
