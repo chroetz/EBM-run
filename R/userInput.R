@@ -46,10 +46,20 @@ getUserInput <- function(title, options, multi = FALSE, default = NULL, onlyNrs 
   }
 
   input <- getLine()
-  ids <- as.numeric(eval(parse(text = paste("c(", input, ")"))))
-  if (!multi && length(ids) > 1) stop("Choose only one element!")
+  tryCatch(
+    {
+      inputAsExpression <- rlang::parse_expr(paste("c(", input, ")"))
+      ids <-
+        inputAsExpression |>
+        rlang::eval_bare(env = new.env(parent = .BaseNamespaceEnv)) |>
+        as.numeric()
+    },
+    error = \(e) {
+      stop("Could not parse input: ", input, call. = FALSE)
+  })
+  if (!multi && length(ids) > 1) stop("Choose only one element!", call. = FALSE)
   if (any(!ids %in% possibleChoicesNr)) {
-    stop("Choose numbers from ", paste(possibleChoicesNr, collapse=","), "!")
+    stop("Choose numbers from ", paste(possibleChoicesNr, collapse=","), "!", call. = FALSE)
   }
   if (length(ids) == 0) {
     ids <- possibleChoicesNr[possibleChoices %in% default]
