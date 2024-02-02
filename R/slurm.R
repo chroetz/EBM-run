@@ -18,7 +18,7 @@ executeCodeViaSlurm <- function(
     if (!dir.exists(logDir)) dir.create(logDir)
     command <- createSlurmCommand(
       qos, cpusPerTask, jobName, logDir, timeInMinutes, mail, startAfterJobIds, dependencyMode,
-      paste0("\"Rscript -e '", escapedCmdStr, "'\""))
+      wrap = paste0("\"Rscript -e '", escapedCmdStr, "'\""))
     cat(command, "\n")
     output <- system(command, intern = TRUE)
     jobId <- extractJobId(output)
@@ -80,7 +80,8 @@ executeScriptViaSlurm <- function(
     timeInMinutes = NULL,
     mail = TRUE,
     logDir = "_log",
-    startAfterJobIds = NULL
+    startAfterJobIds = NULL,
+    dependencyMode = NULL
 ) {
   qos <- match.arg(qos)
   stopifnot(isSlurmAvailable())
@@ -93,7 +94,7 @@ executeScriptViaSlurm <- function(
       gsub("[^a-zA-Z0-9]", "-", paste(args, collapse="-")))
     cat("Starting SLURM job", jobName, "\n")
     command <- createSlurmCommand(
-      qos, cpusPerTask, jobName, logDir, timeInMinutes, mail, startAfterJobIds,
+      qos, cpusPerTask, jobName, logDir, timeInMinutes, mail, startAfterJobIds, dependencyMode,
       paste0(
         "\"Rscript '", scriptFilePath, "'",
         " ", gsub("\"", "\\\\\"", paste(args, collapse=" ")), "\""))
