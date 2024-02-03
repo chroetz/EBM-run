@@ -66,13 +66,13 @@ interactRunSearch <- function(useSlurm, path = ".") {
     path = path,
     pattern = ".json$",
     recursive = FALSE)
+  dirPaths <- list.dirs(
+    path = path,
+    recursive = FALSE,
+    full.names = FALSE)
   dirPaths <- c(
     "..",
-    list.dirs(
-      path = path,
-      recursive = FALSE,
-      full.names = FALSE)
-  )
+    str_subset(dirPaths, "^[\\._]", negate = TRUE))
   optsFilePrefix <- "run "
   dirPrefix <- "goto "
   choices <- c(
