@@ -1,5 +1,6 @@
 {
   "_class": ["SumMask", "Run", "Opts"],
   "maskFilePath": "path/to/maskFile.nc",
-  "outFilePath": "path/to/out.nc"
+  "outFilePath": "path/to/out.nc",
+  "regionRegex": null
 }

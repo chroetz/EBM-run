@@ -29,8 +29,7 @@ runMethodSumMask <- function(opts) {
 
   args <- extractArgs(opts)
 
-  do.call(cerProcessNetCdf::setupMaskSummation, args)
-  cerProcessNetCdf::runMaskSummation()
+  do.call(cerProcessNetCdf::sumMask, args)
 }
 
 
