@@ -10,7 +10,7 @@
     "maskedValue": "sum(mask * x)",
     "maskSize": "sum(mask)"
   },
-  "outFilePrefix": "path/to/dir/file_prefix",
+  "outFilePrefixPath": "path/to/dir/file_prefix",
   "yearsFilter": null,
   "regionRegex": null
 }

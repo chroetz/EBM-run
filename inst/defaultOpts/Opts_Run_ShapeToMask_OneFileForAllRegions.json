@@ -1,7 +1,7 @@
 {
   "_class": ["OneFileForAllRegions", "ShapeToMask", "Run", "Opts"],
   "shapeFilePath": "path/to/shapefiles.gpkg",
-  "outFilePrefix": "maskOutPrefix",
+  "outFilePrefixPath": "maskOutPrefix",
   "metaOutFilePath": "meta.csv",
   "idColumnName": "",
   "_idColumnName_description": "VariableName or empty string for guessing"

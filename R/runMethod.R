@@ -45,9 +45,9 @@ runMethodAggregateNaryMasked <- function(opts) {
     opts,
     nBatches = opts$slurm$nJobs,
     batchIndex = opts$slurm$jobIdx,
-    outFilePath = paste0(opts$outFilePrefix, "_", opts$slurm$jobIdx, ".csv"),
+    outFilePath = paste0(opts$outFilePrefixPath, "_", opts$slurm$jobIdx, ".csv"),
     aggregateExpression = exprList,
-    .remove = c("aggregateTextList", "outFilePrefix"))
+    .remove = c("aggregateTextList", "outFilePrefixPath"))
 
   do.call(cerProcessNetCdf::aggregateNaryMasked, args)
 }
@@ -99,11 +99,11 @@ runMethodShapeToMaskOneFileForAllRegions <- function(opts) {
 
   args <- extractArgs(
     opts,
-    outFilePath = paste0(opts$outFilePrefix, "_", opts$slurm$jobIdx, ".nc"),
+    outFilePath = paste0(opts$outFilePrefixPath, "_", opts$slurm$jobIdx, ".nc"),
     metaOutFilePath = metaOutFilePath,
     nBatches = opts$slurm$nJobs,
     batchIndex = opts$slurm$jobIdx,
-    .remove = c("metaOutFilePath", "outFilePrefix"))
+    .remove = c("metaOutFilePath", "outFilePrefixPath"))
 
   do.call(cerProcessNetCdf::runShapeToMaskOneFileForAllRegions, args, quote = TRUE)
 }
