@@ -52,6 +52,19 @@ runMethodAggregateNaryMasked <- function(opts) {
 }
 
 
+runMethodRollTimeApply <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("RollTimeApply", "Run"))
+
+  args <- extractArgs(
+    opts,
+    nBatches = opts$slurm$nJobs,
+    batchIndex = opts$slurm$jobIdx)
+
+  do.call(cerProcessNetCdf::rollTimeApply, args)
+}
+
+
 runMethodShapeToMask <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("ShapeToMask", "Run"))

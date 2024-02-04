@@ -72,7 +72,7 @@ interactRunSearch <- function(useSlurm, path = ".") {
     full.names = FALSE)
   dirPaths <- c(
     "..",
-    str_subset(dirPaths, "^[\\._]", negate = TRUE))
+    str_subset(dirPaths, "^[\\.]", negate = TRUE))
   optsFilePrefix <- "run "
   dirPrefix <- "goto "
   choices <- c(

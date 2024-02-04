@@ -1,0 +1,16 @@
+{
+  "_class": ["RollTimeApply", "Run", "Opts"],
+  "targetFormat": null,
+  "variableDataDescriptor": {
+    "_class": ["MultiFile", "DataDescriptor", "Opts"]
+  },
+  "applyFunctionList": null,
+  "outFilePath": "path/to/out.nc",
+  "padding": [3,3],
+  "fill": "const",
+  "idxDim": "lon",
+  "lineCount": 1,
+  "timeRange": null,
+  "nBatches": 1,
+  "batchIndex": 1
+}

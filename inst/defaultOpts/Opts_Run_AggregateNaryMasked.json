@@ -1,5 +1,6 @@
 {
   "_class": ["AggregateNaryMasked", "Run", "Opts"],
+  "targetFormat": null,
   "maskFilePath": "path/to/mask.nc",
   "maskSumFilePath": "path/to/maskSum.nc",
   "boundingBoxFilePath": "path/to/bbox.nc",

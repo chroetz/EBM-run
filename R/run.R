@@ -97,6 +97,7 @@ runOpts <- function(opts, jobIdx=NULL) {
     BoundingBoxes = runMethodBoundingBoxes(opts),
     SumMask = runMethodSumMask(opts),
     AggregateNaryMasked = runMethodAggregateNaryMasked(opts),
+    RollTimeApply = runMethodRollTimeApply(opts),
     ConcatNetCdf = runMethodConcatNetCdf(opts),
     CreateMaps = runMethodCreateMaps(opts),
     ImagesToVideo = runMethodImagesToVideo(opts),
