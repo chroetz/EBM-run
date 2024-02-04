@@ -1,0 +1,10 @@
+{
+  "_class": ["RollTimeApplyConcat", "Run", "Opts"],
+  "dirPath": "path/to/in/dir",
+  "pattern": "inFileRegex",
+  "outDirPath": "path/to/out/dir",
+  "suffix": "concat",
+  "referenceDirPath": "path/to/reference/dir",
+  "referencePattern": "referenceFileRegex",
+  "deflate": 9
+}

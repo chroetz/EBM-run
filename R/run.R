@@ -98,6 +98,7 @@ runOpts <- function(opts, jobIdx=NULL) {
     SumMask = runMethodSumMask(opts),
     AggregateNaryMasked = runMethodAggregateNaryMasked(opts),
     RollTimeApply = runMethodRollTimeApply(opts),
+    RollTimeApplyConcat = runMethodRollTimeApplyConcat(opts),
     ConcatNetCdf = runMethodConcatNetCdf(opts),
     CreateMaps = runMethodCreateMaps(opts),
     ImagesToVideo = runMethodImagesToVideo(opts),

@@ -65,6 +65,16 @@ runMethodRollTimeApply <- function(opts) {
 }
 
 
+runMethodRollTimeApplyConcat <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("RollTimeApplyConcat", "Run"))
+
+  args <- extractArgs(opts)
+
+  do.call(cerProcessNetCdf::concatAfterRoll, args)
+}
+
+
 runMethodShapeToMask <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("ShapeToMask", "Run"))
