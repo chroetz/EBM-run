@@ -69,7 +69,10 @@ runMethodRollTimeApplyConcat <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("RollTimeApplyConcat", "Run"))
 
-  args <- extractArgs(opts)
+  args <- extractArgs(
+    opts,
+    nBatches = opts$slurm$nJobs,
+    batchIndex = opts$slurm$jobIdx)
 
   do.call(cerProcessNetCdf::concatAfterRoll, args)
 }
