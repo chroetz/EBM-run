@@ -3,11 +3,11 @@ environmentVariables <- new.env(parent = emptyenv())
 environmentVariablesDefault <- list(
   CER_ROOT = "..",
   CER_DATA = "{CER_ROOT}/data",
+  CER_EXPLORE = "{CER_ROOT}/explore",
   CER_PROCESSED = "{CER_ROOT}/processed",
+  CER_REGRESSION = "{CER_ROOT}/regression",
   CER_RUN = "{CER_ROOT}/run",
-  CER_VARIABLE = "{CER_ROOT}/variable",
-  CER_EXPLORE = "{CER_ROOT}/explore"
-)
+  CER_VARIABLE = "{CER_ROOT}/variable")
 
 
 # Check system environment variables and overwrite default values.

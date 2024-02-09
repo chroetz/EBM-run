@@ -1,0 +1,12 @@
+{
+  "_class": ["Regression", "Run", "Opts"],
+  "dataFilePath": "path/to/data.csv",
+  "outFilePath": "path/to/out.RDS",
+  "variableListList": null,
+  "regionName": "GID_1",
+  "timeName": "year",
+  "timeRange": null,
+  "regionRegex": null,
+  "nBatches": 1,
+  "batchIndex": 1
+}

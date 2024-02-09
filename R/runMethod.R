@@ -192,3 +192,27 @@ runMethodSummary <- function(opts) {
 
   do.call(cerExploreData::renderSummary, args, quote = TRUE)
 }
+
+
+runMethodRegression <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("Regression", "Run"))
+
+  variableTable <- lapply(
+    opts$variableListList,
+    \(lt) {
+      lt |>
+        lapply(\(x) if (length(x) == 1) x else list(x)) |>
+        as_tibble()
+    }) |>
+    bind_rows()
+
+  args <- extractArgs(
+    opts,
+    nBatches = opts$slurm$nJobs,
+    batchIndex = opts$slurm$jobIdx,
+    variableTable = variableTable,
+    .remove = c("variableListList"))
+
+  do.call(cerStatistic::runRegressions, args, quote = TRUE)
+}
