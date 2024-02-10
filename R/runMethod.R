@@ -178,9 +178,6 @@ runMethodSummary <- function(opts) {
     opts,
     nBatches = opts$slurm$nJobs,
     batchIndex = opts$slurm$jobIdx,
-    outDir = dirname(opts$outFilePath),
-    outFileName = cerUtility::removeFileNameEnding(basename(opts$outFilePath)),
-    outFormat = cerUtility::getFileNameEnding(opts$outFilePath),
     aggregateFunctions =
       opts$aggregateFunctionsText |>
       rlang::parse_expr(),
@@ -188,7 +185,6 @@ runMethodSummary <- function(opts) {
       opts$transformationsText |>
       rlang::parse_expr(),
     .remove = c(
-      "outFilePath",
       "aggregateFunctionsText",
       "transformationsText"))
 

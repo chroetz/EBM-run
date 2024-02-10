@@ -1,6 +1,8 @@
 {
   "_class": ["Summary", "Run", "Opts"],
-  "outFilePath": "path/to/out.html",
+  "outDirPath": "path/to/outdir",
+  "outFileNameGlue": "summary_{databaseName}_{variableName}",
+  "outFormat": "html",
   "dataFilePath": "path/to/data.csv",
   "variableName": "columnOfInterest",
   "regionName": "GID_1",
