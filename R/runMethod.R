@@ -176,6 +176,8 @@ runMethodSummary <- function(opts) {
 
   args <- extractArgs(
     opts,
+    nBatches = opts$slurm$nJobs,
+    batchIndex = opts$slurm$jobIdx,
     outDir = dirname(opts$outFilePath),
     outFileName = cerUtility::removeFileNameEnding(basename(opts$outFilePath)),
     outFormat = cerUtility::getFileNameEnding(opts$outFilePath),
