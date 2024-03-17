@@ -21,6 +21,7 @@ Imports:
     sessioninfo,
     stringr,
     tibble,
-    withr
+    withr,
+    cerStatistic
 Suggests: 
     testthat (>= 3.0.0)
