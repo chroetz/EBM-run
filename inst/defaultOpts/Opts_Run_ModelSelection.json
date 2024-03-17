@@ -1,10 +1,10 @@
 {
   "_class": ["ModelSelection", "Run", "Opts"],
-  "outDirPath": "C:/Users/cschoetz/UniSync/EBM/24-03-07_Modelselection2",
-  "outFileName": "test7",
+  "outDirPath": "path/to/outDir",
+  "outFileName": "DefaultFileName",
   "outFormat": "HTML",
-  "name": "newTest7",
-  "workDir": "C:/Users/cschoetz/UniSync/EBM/24-03-07_Modelselection2",
+  "name": "DefaultName",
+  "workDirPath": "path/to/workDir",
   "overwriteNoFeCsv": true,
   "nRepsFinal": 2,
   "seClusterVariables": ["ID", "theYear"],
@@ -12,13 +12,13 @@
   "nFolds": 10,
   "cvClusterVariable": "theYear",
   "timeTrendOrders": [0, 1, 2],
-  "dataSets": {
-    "MixAll": "~/cerROOT/variable/dataCntryRegiLaggedClean.csv",
-    "MixCleaned": "~/cerROOT/variable/dataCntryRegiLaggedCleanClean.csv"
+  "dataSetPaths": {
+    "MixAll": "{CER_VARIABLE}/dataCntryRegiLaggedClean.csv",
+    "MixCleaned": "{CER_VARIABLE}/dataCntryRegiLaggedCleanClean.csv"
   },
   "target": "log2growth",
   "predictorListGenerator": {
     "_class": ["PredictorListGenerator", "Opts"]
   },
-  "cumulate": ["tc34kt", "tc48kt", "tc64kt"]
+  "cumulate": null
 }
