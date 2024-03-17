@@ -103,6 +103,7 @@ runOpts <- function(opts, jobIdx=NULL) {
     CreateMaps = runMethodCreateMaps(opts),
     ImagesToVideo = runMethodImagesToVideo(opts),
     Summary = runMethodSummary(opts),
+    ModelSelection = runMethodModelSelection(opts),
     Regression = runMethodRegression(opts),
     stop("Unknown method: ", subclass)
   )

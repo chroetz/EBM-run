@@ -192,6 +192,21 @@ runMethodSummary <- function(opts) {
 }
 
 
+runMethodModelSelection <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("ModelSelection", "Run"))
+
+  args <- extractArgs(
+    opts,
+    lambda = opts$lambda |> rlang::parse_expr() |> rlang::eval_bare(),
+    predictorList = generatePredictorList(opts$predictorListGenerator),
+    .remove = c(
+      "predictorListGenerator"))
+
+  do.call(cerStatistic::renderModelSelection, args, quote = TRUE)
+}
+
+
 runMethodRegression <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("Regression", "Run"))

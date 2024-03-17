@@ -1,0 +1,11 @@
+{
+    "_class": ["PredictorListGenerator", "Opts"],
+    "elements": {
+        "main_and": [".tas", ".tc"],
+        ".tas_or": ["", ["tas", "tas_2"]],
+        ".tc_or": ["tc34kt", "tc48kt", "tc64kt"],
+        "tc34kt_lag": [0, 1, 2, 3],
+        "tc48kt_lag": [0, 1, 2, 3],
+        "tc64kt_lag": [0, 1, 2, 3]
+    }
+}
