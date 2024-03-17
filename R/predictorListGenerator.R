@@ -2,7 +2,7 @@ generatePredictorList <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, "PredictorListGenerator")
 
-  nameAndType <- str_split_fixed(names(opts$elements), "_", 2)
+  nameAndType <- str_match(names(opts$elements), "^(.*)_([^_]*)$")[, -1, drop=FALSE]
   settings <- tibble(
     name = nameAndType[,1],
     type = nameAndType[,2],
