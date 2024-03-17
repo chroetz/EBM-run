@@ -27,7 +27,7 @@ createInstance <- function(name, settings) {
     lag = lapply(value, \(v) if (v == 0) name else c(name, paste0(name, "_lag", seq_len(v)))),
     stop("Unknown type: ", type))
   if (name == "main") instances <- c(list(""), instances)
-  instances <- lapply(instances, \(inst) inst[nchar(inst) > 0])
+  instances <- lapply(instances, \(inst) unique(inst[nchar(inst) > 0]))
   instances <- unique(instances)
   return(instances)
 }
