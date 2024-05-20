@@ -1,0 +1,14 @@
+{
+  "_class": ["AggregateAllTime", "Run", "Opts"],
+  "targetFormat": null,
+  "variableDataDescriptor": {
+    "_class": ["MultiFile", "DataDescriptor", "Opts"]
+  },
+  "applyFunctionList": null,
+  "outFilePath": "path/to/out.nc",
+  "idxDim": "lon",
+  "lineCount": 1,
+  "timeRange": null,
+  "nBatches": 1,
+  "batchIndex": 1
+}

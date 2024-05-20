@@ -78,6 +78,32 @@ runMethodRollTimeApplyConcat <- function(opts) {
 }
 
 
+runMethodAggregateAllTime <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("AggregateAllTime", "Run"))
+
+  args <- extractArgs(
+    opts,
+    nBatches = opts$slurm$nJobs,
+    batchIndex = opts$slurm$jobIdx)
+
+  do.call(cerProcessNetCdf::aggregateAllTime, args)
+}
+
+
+runMethodAggregateAllTimeConcat <- function(opts) {
+
+  opts <- ConfigOpts::asOpts(opts, c("AggregateAllTimeConcat", "Run"))
+
+  args <- extractArgs(
+    opts,
+    nBatches = opts$slurm$nJobs,
+    batchIndex = opts$slurm$jobIdx)
+
+  do.call(cerProcessNetCdf::concatAfterAggAllTime, args)
+}
+
+
 runMethodShapeToMask <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("ShapeToMask", "Run"))

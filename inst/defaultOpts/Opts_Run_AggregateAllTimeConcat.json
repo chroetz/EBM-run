@@ -1,0 +1,7 @@
+{
+  "_class": ["AggregateAllTimeConcat", "Run", "Opts"],
+  "dirPath": "path/to/in/dir",
+  "pattern": "inFileRegex",
+  "outDirPath": "path/to/out/dir",
+  "deflate": 9
+}
