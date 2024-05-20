@@ -95,10 +95,7 @@ runMethodAggregateAllTimeConcat <- function(opts) {
 
   opts <- ConfigOpts::asOpts(opts, c("AggregateAllTimeConcat", "Run"))
 
-  args <- extractArgs(
-    opts,
-    nBatches = opts$slurm$nJobs,
-    batchIndex = opts$slurm$jobIdx)
+  args <- extractArgs(opts)
 
   do.call(cerProcessNetCdf::concatAfterAggAllTime, args)
 }
